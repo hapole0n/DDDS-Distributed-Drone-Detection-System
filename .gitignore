@@ -1,0 +1,85 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual envs ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Tooling ---
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Project: do not version-control bulky raw media or generated artifacts ---
+# User-supplied audio (primary) + any media variants
+audio/**/*.mp3
+audio/**/*.wav
+audio/**/*.flac
+audio/**/*.ogg
+audio/**/*.opus
+audio/**/*.m4a
+audio/**/*.aac
+audio/**/*.mp4
+audio/**/*.mkv
+audio/**/*.webm
+audio/**/*.mov
+audio/**/*.avi
+
+# Generated audio chunks and features
+data/raw/**/*.wav
+data/chunks/**/*.wav
+data/features/**/*.npz
+
+# Trained models (regenerate from data)
+models/*.pkl
+models/*.joblib
+models/*.json
+
+# Evaluation reports
+reports/*.png
+reports/*.html
+reports/*.csv
+reports/*.md
+!reports/.gitkeep
+
+# Streamlit cache
+.streamlit/secrets.toml
+
+# Keep folder structure
+!.gitkeep
