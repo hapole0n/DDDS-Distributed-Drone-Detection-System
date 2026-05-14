@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drone-detector"
+version = "0.1.0"
+description = "Acoustic detection of UAVs (focus: Shahed-136) using MFCC features and a Random Forest classifier, with an optional Streamlit dashboard and live microphone demo."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Oleh Kropyva" }
+]
+keywords = ["acoustic", "uav", "drone", "detection", "shahed", "mfcc", "machine-learning"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+]
+
+dependencies = [
+    "numpy>=1.26,<3",
+    "scipy>=1.11",
+    "scikit-learn>=1.4",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "sounddevice>=0.4.6",
+    "imageio-ffmpeg>=0.4.9",
+    "yt-dlp>=2024.1",
+    "joblib>=1.3",
+    "matplotlib>=3.8",
+    "plotly>=5.18",
+    "pandas>=2.1",
+    "streamlit>=1.36",
+    "pydantic>=2.5",
+    "pydantic-settings>=2.1",
+    "typer>=0.9",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.1.9",
+]
+
+[project.scripts]
+drone-detector = "drone_detector.pipeline.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
