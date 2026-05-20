@@ -1,6 +1,6 @@
 # Drone Acoustic Detector
 
-> Master's final project — Politechnika Lubelska, *Inżynierskie Zastosowania
+> project — Politechnika Lubelska, *Inżynierskie Zastosowania
 > Informatyki w Elektrotechnice II stopnia*, course *Programowanie w języku
 > Python*. Author: **Oleh Kropyva**.
 
