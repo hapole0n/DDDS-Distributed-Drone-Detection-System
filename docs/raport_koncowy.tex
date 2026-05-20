@@ -1,0 +1,1634 @@
+% =============================================================================
+% AeroEar — system akustycznej detekcji UAV w czasie rzeczywistym
+% Raport końcowy projektu z przedmiotu „Programowanie w języku Python"
+% Politechnika Lubelska, Wydział Informatyki i Elektrotechniki
+% Autor: Oleh Kropyva,  IZIwE II – grupa 1.1.2,  Rok akademicki 2025/2026
+% =============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.3cm,headheight=14pt]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{amsmath, amssymb}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+% ---------- Kolory motywu projektowego ----------
+\definecolor{accent}{HTML}{FF6B35}
+\definecolor{accent2}{HTML}{FFB23F}
+\definecolor{cool}{HTML}{5DADE2}
+\definecolor{danger}{HTML}{E74C3C}
+\definecolor{success}{HTML}{27AE60}
+\definecolor{codebg}{HTML}{F7F7F2}
+\definecolor{codecomment}{HTML}{6A737D}
+\definecolor{codekeyword}{HTML}{C0392B}
+\definecolor{codestring}{HTML}{27AE60}
+
+% ---------- Linki i odnośniki ----------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  urlcolor=cool,
+  citecolor=accent2,
+}
+
+% ---------- Nagłówki / stopki ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize Programowanie w języku Python --- IZIwE II grupa 1.1.2}
+\fancyhead[R]{\footnotesize O. Kropyva}
+\fancyfoot[L]{\footnotesize mgr inż. A. Wilczyńska}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\footnotesize Rok 2025/2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ---------- Styl tytułów ----------
+\titleformat{\section}{\Large\bfseries\color{accent}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{accent!80!black}}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.4em}
+
+% ---------- Styl listingów kodu ----------
+\lstdefinestyle{pystyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\footnotesize,
+  commentstyle=\color{codecomment}\itshape,
+  keywordstyle=\color{codekeyword}\bfseries,
+  stringstyle=\color{codestring},
+  numberstyle=\tiny\color{codecomment},
+  numbers=left,
+  numbersep=8pt,
+  frame=single,
+  rulecolor=\color{accent!50},
+  framerule=0.6pt,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  captionpos=b,
+  literate={ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l{}}}1
+           {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+           {Ą}{{\k{A}}}1 {Ć}{{\'C}}1 {Ę}{{\k{E}}}1 {Ł}{{\L{}}}1
+           {Ń}{{\'N}}1 {Ó}{{\'O}}1 {Ś}{{\'S}}1 {Ź}{{\'Z}}1 {Ż}{{\.Z}}1,
+}
+\lstset{style=pystyle}
+
+\lstdefinestyle{yamlstyle}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  commentstyle=\color{codecomment}\itshape,
+  keywordstyle=\color{codekeyword}\bfseries,
+  stringstyle=\color{codestring},
+  numbers=left, numbersep=8pt, numberstyle=\tiny\color{codecomment},
+  frame=single, rulecolor=\color{accent!50}, framerule=0.6pt,
+  breaklines=true, showstringspaces=false, tabsize=2, captionpos=b,
+}
+
+% ---------- Liczenie odwołań ----------
+\newcommand{\sectionref}[1]{sekcja \ref{#1}}
+\newcommand{\tabref}[1]{tab.~\ref{#1}}
+\newcommand{\rysref}[1]{rys.~\ref{#1}}
+\newcommand{\listref}[1]{listing~\ref{#1}}
+
+% =============================================================================
+\begin{document}
+
+% ============================== STRONA TYTUŁOWA ==============================
+\begin{titlepage}
+\centering
+\vspace*{1.0cm}
+
+{\Large\bfseries Politechnika Lubelska}\\[0.2cm]
+{\normalsize Wydział Informatyki i Elektrotechniki}\\[0.2cm]
+{\normalsize Kierunek: Inżynierskie Zastosowania Informatyki w Elektrotechnice (IZIwE) II stopnia}\\[0.2cm]
+{\normalsize Laboratorium / Przedmiot: \textbf{Programowanie w języku Python}}\\[0.2cm]
+{\normalsize Rok akademicki 2025/2026}\\[1.5cm]
+
+\rule{\linewidth}{0.5mm}\\[0.5cm]
+{\Huge\bfseries\color{accent} AeroEar}\\[0.2cm]
+{\Large System akustycznej detekcji bezzałogowych statków powietrznych\\
+w czasie rzeczywistym na przykładzie klasy Shahed-136}\\[0.4cm]
+\rule{\linewidth}{0.5mm}\\[0.8cm]
+
+{\large\itshape Sprawozdanie z projektu --- raport końcowy}\\[2.0cm]
+
+\begin{flushleft}
+\large
+\textbf{Autor:}\hspace{1cm} Oleh Kropyva\\[0.2cm]
+\textbf{Grupa:}\hspace{1.2cm} IZIwE II --- grupa 1.1.2\\[0.2cm]
+\textbf{Prowadzący:}\hspace{0.2cm} mgr inż.\ Aleksandra Wilczyńska\\[0.2cm]
+\textbf{Data oddania:}\hspace{0.1cm} maj 2026\\[0.2cm]
+\textbf{Repozytorium GitHub:} \url{https://github.com/dtecx/drone-detector}\\[0.2cm]
+\textbf{Licencja:}\hspace{0.7cm} MIT
+\end{flushleft}
+
+\vfill
+\begin{center}
+\color{accent}\rule{0.4\linewidth}{0.4pt}\\[0.3cm]
+\itshape\small Defensywne badania nad systemami akustycznego wczesnego ostrzegania.\\
+Projekt nie generuje współrzędnych celu, naprowadzania broni ani danych operacyjnych.
+\end{center}
+\end{titlepage}
+
+% ================================== ToC ======================================
+\tableofcontents
+\newpage
+
+% =============================== STRESZCZENIE ================================
+\section*{Streszczenie}
+\addcontentsline{toc}{section}{Streszczenie}
+
+W ramach projektu zaprojektowano i zaimplementowano kompletny system akustycznej
+detekcji bezzałogowych statków powietrznych \textbf{AeroEar}, ze szczególnym
+uwzględnieniem przypadku użycia klasy Shahed-136 --- bojowego drona-amunicji
+krążącej napędzanego silnikiem spalinowym, regularnie naruszającego przestrzeń
+powietrzną państw graniczących ze strefą konfliktu rosyjsko-ukraińskiego, w tym
+\textbf{Polski} \cite{shahed_airspace, who_civilian}. System realizuje pełen cykl
+przetwarzania: od dostarczenia plików MP3 przez użytkownika, poprzez automatyczną
+ekstrakcję cech akustycznych, trening klasyfikatora, aż po inferencję w czasie
+rzeczywistym z pojedynczego mikrofonu USB.
+
+Implementacja oparta jest wyłącznie na otwartym oprogramowaniu w języku
+\textbf{Python} (\texttt{librosa}, \texttt{scikit-learn}, \texttt{sounddevice},
+\texttt{Streamlit}, \texttt{Plotly}). Pipeline ekstrakcji cech wykorzystuje
+\textbf{40-wymiarowe współczynniki MFCC} wraz z ich odchyleniami standardowymi
+oraz pierwszą pochodną temporalną, formując 120-wymiarowy wektor cech podawany na
+wejście klasyfikatora \textbf{Random Forest} (300 drzew, ważenie klas
+zbalansowane). Warstwa wizualizacji opiera się o \textbf{interaktywny dashboard
+Streamlit} złożony z pięciu stron, w tym animowanej strony detekcji na żywo z
+gauge'em prawdopodobieństwa, miernikiem VU oraz rolującą spektrogramem mel.
+Projekt udostępnia również w pełni udokumentowane \textbf{rozszerzenie projektowe}
+w postaci 4-mikrofonowego szyku TDOA z lokalizacją kierunku przyjścia sygnału
+metodą GCC-PHAT.
+
+Pełna pipeline'a od pliku wejściowego do natrenowanego modelu wykonuje się
+\textbf{w czasie poniżej 5 minut} na laptopowym CPU dla zbioru rozmiaru
+$\sim$10\,minut audio. Latencja detekcji w trybie real-time wynosi
+\textbf{około 600\,ms} (okno 2\,s, hop 0{,}5\,s). Całkowity koszt sprzętowy
+prototypu wynosi \textbf{$\sim$80\,PLN} (sam mikrofon USB Maono), co czyni
+rozwiązanie wielokrotnie tańszym od jakiejkolwiek komercyjnej alternatywy w
+klasie systemów wczesnego ostrzegania akustycznego.
+
+\textbf{Słowa kluczowe:}
+przetwarzanie sygnałów, akustyka, MFCC, Random Forest, klasyfikacja audio,
+detekcja UAV, Shahed-136, GCC-PHAT, TDOA, lokalizacja kierunku, Streamlit,
+Plotly, Python, librosa, scikit-learn, wczesne ostrzeganie, accessibility,
+obrona cywilna.
+
+\newpage
+
+% =========================== 1. WPROWADZENIE =================================
+\section{Wprowadzenie}
+
+Od jesieni 2022 roku jedną z najczęściej spotykanych zagrożeń dla infrastruktury
+energetycznej i mieszkaniowej w Ukrainie stały się amunicje krążące klasy
+\textbf{Shahed-136} (produkcji irańskiej, rosyjska kopia oznaczona \emph{Geran-2})
+\cite{shahed_airspace}. Drony tej klasy są jednorazowe, tanie (szacunkowy koszt
+jednostkowy 20--50\,tys.\ USD) i wykorzystywane masowo --- typowy atak liczy
+od kilkudziesięciu do kilkuset jednostek wystrzeliwanych w jednym przedziale
+czasowym. Charakterystyczną cechą Shahed-136 jest napęd: dwucylindrowy silnik
+spalinowy z popychanym śmigłem o mocy ok.\ 50\,KM, pracujący przy obrotach
+5000--7000\,RPM, co generuje \textbf{tonalny dźwięk o częstotliwości
+podstawowej 80--120\,Hz} z bogatym pasmem harmonicznych sięgającym 5\,kHz
+\cite{shahed_acoustic}. Sygnatura akustyczna jest na tyle wyraźna, że ludność
+cywilna popularnie określa Shahed mianem \emph{,,mopeda''}.
+
+Charakter tej sygnatury sprawia, że \textbf{detekcja akustyczna} stanowi
+sensowne, niskobudżetowe uzupełnienie systemów radarowych:
+\begin{itemize}[noitemsep]
+  \item radar w paśmie S/X słabo radzi sobie z małymi celami z kompozytów,
+        latającymi nisko;
+  \item kamery termowizyjne mają zasięg silnie zależny od warunków
+        atmosferycznych i kąta podejścia;
+  \item mikrofon kondensatorowy nawet konsumenckiej klasy wykrywa Shahed na
+        odległość rzędu \emph{kilkuset metrów} przy korzystnym tle akustycznym
+        \cite{ukrainian_skyfortress}.
+\end{itemize}
+
+Przedmiotowy projekt \textbf{AeroEar} jest \emph{programowo-laboratoryjnym}
+opracowaniem tego problemu, świadomie ograniczonym do warstwy software'owej i
+pojedynczego mikrofonu (warstwa sprzętowa szyku 4-mikrofonowego pozostaje na
+poziomie projektu na papierze --- \sectionref{sec:tdoa}). Projekt powstał jako
+zaliczeniowy z przedmiotu \emph{Programowanie w języku Python} i jednocześnie ma
+stanowić wkład w obszar \textbf{accessible defense informatics} ---
+udostępnienia narzędzi akustycznego wczesnego ostrzegania w postaci otwartego
+kodu źródłowego dostępnego dla każdej jednostki samorządowej, ratunkowej lub
+osoby prywatnej dysponującej zwykłym mikrofonem USB i komputerem.
+
+% =========================== 2. CEL I ZAKRES =================================
+\section{Cel i zakres projektu}
+
+\textbf{Cel główny:} zaprojektowanie i weryfikacja eksperymentalna w pełni
+reprodukowalnego, otwartoźródłowego systemu akustycznej detekcji UAV w czasie
+rzeczywistym, ze szczególnym uwzględnieniem klasy Shahed-136, oraz dostarczenie
+udokumentowanej koncepcji jego rozszerzenia o szyk 4-mikrofonowy TDOA.
+
+\textbf{Cele szczegółowe:}
+\begin{itemize}[noitemsep]
+  \item zaprojektowanie pipeline'u \emph{video/audio $\rightarrow$ WAV
+        $\rightarrow$ chunki $\rightarrow$ cechy MFCC $\rightarrow$ klasyfikator
+        $\rightarrow$ raport ewaluacyjny};
+  \item dobór i implementacja deskryptora akustycznego (MFCC z odchyleniami i
+        $\Delta$-średnimi) odpowiedniego dla \emph{tonalnej} sygnatury silnika
+        spalinowego, a nie \emph{szerokopasmowego} świstu wirników multicopterów;
+  \item implementacja real-time'owego przechwytywania z mikrofonu USB z
+        \emph{automatyczną resamplerą} z natywnej częstotliwości urządzenia
+        (44\,100 / 48\,000\,Hz) do częstotliwości treningowej modelu
+        (22\,050\,Hz);
+  \item opracowanie interaktywnego \textbf{dashboardu Streamlit} z pięcioma
+        stronami: przegląd, trening, analiza pliku, mikrofon na żywo, koncepcja
+        4-mic TDOA;
+  \item napisanie pełnej, akademickiej dokumentacji \emph{paper-design'u}
+        4-mikrofonowego szyku do lokalizacji kierunku przyjścia sygnału metodą
+        GCC-PHAT;
+  \item przygotowanie testów jednostkowych, ciągłej integracji (GitHub Actions)
+        oraz repozytorium spełniającego konwencje \emph{Conventional Commits};
+  \item przeprowadzenie pomiarów latencji, skuteczności i obciążenia sprzętu.
+\end{itemize}
+
+\textbf{Poza zakresem} świadomie pozostawiono:
+\begin{itemize}[noitemsep]
+  \item fizyczne wykonanie 4-mikrofonowego szyku oraz pomiary terenowe ---
+        wymaga sample-synchronicznego przechwytywania, niedostępnego dla
+        niezależnych mikrofonów USB \cite{respeaker};
+  \item trening sieci konwolucyjnej (CNN) na log-mel spektrogramach ---
+        wskazany jako naturalne rozszerzenie w sekcji \ref{sec:rozwoj};
+  \item integrację z systemami radarowymi i optycznymi (sensor fusion);
+  \item jakikolwiek \emph{moduł reakcji ofensywnej} --- granica bezpieczeństwa
+        opisana w \sectionref{sec:bezpieczenstwo} jest nienegocjowalna.
+\end{itemize}
+
+% ====================== 3. ANALIZA PROBLEMU I ROZWIĄZAŃ ======================
+\section{Analiza problemu i przegląd rozwiązań}
+
+W literaturze i praktyce wczesnego ostrzegania można wyróżnić cztery podejścia
+do detekcji UAV:
+\begin{itemize}[noitemsep]
+  \item \textbf{Radar pasywny / aktywny} (S, X, K-band) --- dominujące rozwiązanie
+        wojskowe, koszt $\sim$10$^5$--10$^7$\,USD, słaba detekcja małych celów z
+        kompozytów na małych wysokościach \cite{drone_radar_review}.
+  \item \textbf{Wizja maszynowa (RGB / IR)} --- skuteczna w dzień przy
+        bezchmurnej pogodzie, oparta o YOLO-class detektory na obrazie z
+        kamer PTZ \cite{drone_vision}.
+  \item \textbf{Sniffery RF} --- pasywne odbiorniki sygnałów sterowania
+        2{,}4/5{,}8\,GHz; bezużyteczne dla autonomicznych Shahed (brak linka
+        radiowego w fazie misji).
+  \item \textbf{Detekcja akustyczna} --- pasywne mikrofony, niski koszt, działa
+        w nocy i przy zachmurzeniu, ograniczony zasięg (50--500\,m dla małych
+        UAV w warunkach miejskich) \cite{drone_acoustic_park, drone_acoustic_bernardini}.
+\end{itemize}
+
+Ze względu na charakter zagrożenia (masowe, niskobudżetowe drony krążące) oraz
+możliwości finansowe samorządów i obrony cywilnej, podejście akustyczne wydaje
+się \emph{komplementarne} (a nie konkurencyjne) wobec radaru: stanowi tani
+,,ostatni metr'' wczesnego ostrzegania w sytuacji, gdy radar nie zdążył wykryć
+celu na większej odległości.
+
+Wśród istniejących rozwiązań akustycznych warto wymienić:
+\begin{itemize}[noitemsep]
+  \item \textbf{Sky Fortress / Zvook} (Ukraina) --- społecznościowa sieć
+        kilkuset mikrofonów na słupach energetycznych, łącząca dane do
+        centralnego serwera \cite{ukrainian_skyfortress};
+  \item \textbf{Squarehead Discovair} --- komercyjny system z szykiem
+        128-mikrofonowym, $>$50\,tys.\ USD;
+  \item \textbf{Akademickie dataset'y}: \emph{DREGON}
+        \cite{dataset_dregon}, \emph{Drone-vs-Bird} \cite{dataset_drone_vs_bird}.
+\end{itemize}
+
+Pozycjonowanie projektu AeroEar na tle wymienionych rozwiązań przedstawia
+\tabref{tab:positioning}.
+
+\begin{table}[H]
+\centering
+\caption{Pozycjonowanie projektu AeroEar na tle innych rozwiązań detekcji UAV.}
+\label{tab:positioning}
+\begin{tabularx}{\linewidth}{lXXXX}
+\toprule
+\textbf{Cecha} & \textbf{AeroEar} & \textbf{Sky Fortress} & \textbf{Komercyjny radar} & \textbf{Squarehead} \\
+\midrule
+Otwarty kod źródłowy        & TAK         & cz.         & nie        & nie         \\
+Koszt prototypu             & $\sim$80 PLN & --         & 10$^5$\,USD$+$ & $>$50\,tys.\ USD \\
+Detekcja Shahed-136         & TAK         & TAK         & TAK        & TAK         \\
+Lokalizacja kierunku        & koncepcja   & TAK (sieć)  & TAK        & TAK         \\
+Działa lokalnie / offline   & TAK         & nie         & TAK        & TAK         \\
+Wymaga GPU                  & NIE         & nie         & --         & nie         \\
+Język implementacji         & Python      & C/Python    & --         & C++         \\
+Możliwy do reprodukcji w domu& TAK        & nie         & nie        & nie         \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% =========================== 4. ZAŁOŻENIA SYSTEMOWE ==========================
+\section{Założenia systemowe}
+
+\textbf{Wymagania funkcjonalne (WF):}
+\begin{itemize}[noitemsep]
+  \item \textbf{WF.1} --- akceptowanie plików MP3, WAV, MP4, MKV i innych
+        formatów dekodowalnych przez \texttt{ffmpeg} jako wejście treningowe;
+  \item \textbf{WF.2} --- automatyczna konwersja do mono 22\,050\,Hz 16-bit PCM;
+  \item \textbf{WF.3} --- nareki na okna 2\,s z 50\,\% nachodzeniem i odrzucaniem
+        ciszy przy RMS poniżej $10^{-4}$;
+  \item \textbf{WF.4} --- klasyfikacja binarna (\emph{shahed} / \emph{noise})
+        z możliwością rozszerzenia do wielu klas;
+  \item \textbf{WF.5} --- inferencja na żywo z pojedynczego mikrofonu USB;
+  \item \textbf{WF.6} --- interaktywny dashboard webowy z animowaną stroną
+        detekcji;
+  \item \textbf{WF.7} --- generowanie raportu ewaluacyjnego (macierz pomyłek,
+        krzywa ROC, classification report).
+\end{itemize}
+
+\textbf{Wymagania niefunkcjonalne (WN):}
+\begin{itemize}[noitemsep]
+  \item \textbf{WN.1} --- latencja detekcji poniżej 1000\,ms (cel: 600\,ms);
+  \item \textbf{WN.2} --- pełen pipeline (od wideo do natrenowanego modelu)
+        poniżej 10\,minut dla zbioru $\sim$10\,min audio;
+  \item \textbf{WN.3} --- działanie wyłącznie na CPU laptopa (bez GPU);
+  \item \textbf{WN.4} --- żadne dane akustyczne nie opuszczają urządzenia
+        użytkownika (\emph{privacy by design});
+  \item \textbf{WN.5} --- 100\,\% otwartego oprogramowania w stosie tech;
+  \item \textbf{WN.6} --- portable: jeden polecenie \texttt{pip install -r}
+        wystarczy do uruchomienia na czystym Windows / Linux / macOS;
+  \item \textbf{WN.7} --- zgodność z konwencją \emph{Conventional Commits},
+        ciągła integracja, testy jednostkowe.
+\end{itemize}
+
+\textbf{Założenia środowiskowe i scenariusze użycia:} typowy mikrofon kondensatorowy
+USB (Maono lub równoważny), laptop klasy biurowej (procesor 4-rdzeniowy x86\_64,
+8\,GB RAM), dystans źródło-mikrofon 0--100\,m, tło akustyczne typu
+,,podmiejskie'' (50--65\,dB SPL).
+
+% ======================== 5. ARCHITEKTURA SYSTEMU ============================
+\section{Architektura systemu}
+
+System został zaprojektowany w sposób \textbf{warstwowy} z silnym rozdzieleniem
+odpowiedzialności. \tabref{tab:warstwy} przedstawia odwzorowanie warstw na
+moduły kodu.
+
+\begin{table}[H]
+\centering
+\caption{Pięciowarstwowy model architektury AeroEar.}
+\label{tab:warstwy}
+\begin{tabularx}{\linewidth}{llX}
+\toprule
+\textbf{Warstwa} & \textbf{Moduł kodu} & \textbf{Rola} \\
+\midrule
+1.~Wejściowa  & \texttt{data/ingest.py}, \texttt{data/youtube.py}
+              & dekodowanie mediów do mono WAV (FFmpeg) \\
+2.~Cech       & \texttt{features/audio.py}
+              & MFCC + $\Delta$ + log-mel spektrogram \\
+3.~Modelu     & \texttt{models/baseline.py}
+              & Random Forest, serializacja \texttt{ModelBundle} \\
+4.~Orkiestracji & \texttt{pipeline/train.py, evaluate.py, cli.py}
+              & end-to-end pipeline + raport \\
+5.~Inferencji & \texttt{live/mic.py}
+              & sample-synchroniczne przechwytywanie, resampling, klasyfikacja \\
+6.~Prezentacji & \texttt{app/streamlit\_app.py}, \texttt{viz/plots.py}
+              & dashboard Streamlit + interaktywne wykresy Plotly \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Schemat przepływu danych}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.55cm and 0.6cm,
+  block/.style={rectangle, draw=accent, line width=0.6pt, rounded corners,
+                fill=accent!5, minimum height=0.85cm, minimum width=2.7cm,
+                align=center, font=\small},
+  arrow/.style={-{Stealth[length=2.4mm,width=2mm]}, line width=0.5pt,
+                draw=black!60},
+]
+\node[block] (input) {\texttt{audio/<label>/*.mp3}};
+\node[block, right=of input] (ingest) {Ingest\\ (ffmpeg)};
+\node[block, right=of ingest] (chunk) {Chunk\\ 2\,s, 50\,\% ovl};
+\node[block, below=of input] (live) {Mikrofon\\ USB Maono};
+\node[block, right=of live] (resample) {Resample\\ $f_s \to 22050$};
+\node[block, right=of resample] (window) {Okno 2\,s};
+\node[block, right=of chunk] (mfcc1) {MFCC};
+\node[block, right=of window] (mfcc2) {MFCC};
+\node[block, below=0.7cm of mfcc1, draw=accent2] (rf) {Random Forest};
+\node[block, right=of mfcc2] (proba) {$P(\text{shahed})$};
+\node[block, right=of proba, draw=danger, fill=danger!10] (alarm) {Banner\\ DETECT};
+\node[block, above=0.5cm of rf, draw=success, fill=success!10] (report)
+  {raport\\ Confusion matrix};
+
+\draw[arrow] (input) -- (ingest);
+\draw[arrow] (ingest) -- (chunk);
+\draw[arrow] (chunk) -- (mfcc1);
+\draw[arrow] (mfcc1) -- (rf);
+\draw[arrow] (rf) -- (report);
+\draw[arrow] (live) -- (resample);
+\draw[arrow] (resample) -- (window);
+\draw[arrow] (window) -- (mfcc2);
+\draw[arrow] (mfcc2) -- (proba);
+\draw[arrow] (proba) -- (alarm);
+\draw[arrow] (rf.east) -- ++(0.4,0) |- (proba.west);
+\end{tikzpicture}
+\caption{Schemat dwóch równoległych ścieżek danych: \emph{ścieżka treningu}
+(pliki MP3 $\rightarrow$ macierz cech $\rightarrow$ klasyfikator $\rightarrow$
+raport) oraz \emph{ścieżka inferencji w czasie rzeczywistym} (mikrofon
+$\rightarrow$ resampling $\rightarrow$ okno $\rightarrow$ MFCC $\rightarrow$
+predykcja $\rightarrow$ banner alarmowy w UI).}
+\label{rys:dataflow}
+\end{figure}
+
+% ======================== 6. ARCHITEKTURA SPRZĘTOWA ==========================
+\section{Architektura sprzętowa}
+
+W obecnej fazie projekt jest celowo zaprojektowany w sposób
+\emph{,,sprzętowo-minimalny''} --- jednym wymaganym komponentem jest mikrofon USB
+i komputer. Pełne zestawienie sprzętu wykorzystanego do testów funkcjonalnych
+przedstawia \tabref{tab:hardware}.
+
+\begin{table}[H]
+\centering
+\caption{Zestawienie komponentów sprzętowych prototypu AeroEar.}
+\label{tab:hardware}
+\begin{tabularx}{\linewidth}{clXl}
+\toprule
+\textbf{Nr} & \textbf{Komponent} & \textbf{Rola} & \textbf{Status} \\
+\midrule
+1 & Maono USB Condenser Mic (PM421/PM422) & Akwizycja akustyczna mono 48\,kHz & wykorzystany \\
+2 & Laptop x86\_64 z Python 3.12      & Inferencja, treningu, dashboard       & wykorzystany \\
+3 & ESP32-S3 + 4$\times$ INMP441 I$^2$S    & Sample-synchr. szyk 4-mic (koncepcja) & niezrealizowany \\
+4 & BME280 (T, RH, p)                 & Kompensacja $c(T,RH)$ (koncepcja)     & niezrealizowany \\
+5 & Raspberry Pi 5 + Hailo-8L         & Edge deployment z akceleratorem NPU   & rozwojowe \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Mikrofon \textbf{Maono} jest typowym kondensatorem USB klasy konsumenckiej (cena
+detaliczna $\sim$80\,PLN, charakterystyka kierunkowa kardioidalna, pasmo
+20\,Hz--16\,kHz, próbkowanie 48\,kHz, kwantyzacja 16-bit). Mimo że jego
+charakterystyka częstotliwościowa w dolnym paśmie poniżej 80\,Hz ma łagodne
+opadanie (typowe dla mikrofonów wokalowych), Shahed-136 generuje wystarczająco
+silne harmoniczne powyżej 100\,Hz, aby detekcja była możliwa.
+
+% ======================= 7. ARCHITEKTURA PROGRAMOWA ==========================
+\section{Architektura programowa}
+
+Stos technologiczny zbudowano w pełni z otwartego oprogramowania (FOSS).
+\tabref{tab:software} przedstawia główne komponenty wraz z ich rolą.
+
+\begin{table}[H]
+\centering
+\caption{Stos technologiczny systemu AeroEar.}
+\label{tab:software}
+\begin{tabularx}{\linewidth}{llX}
+\toprule
+\textbf{Oprogramowanie} & \textbf{Wersja} & \textbf{Przeznaczenie} \\
+\midrule
+Python                & 3.10+      & Język główny i jedyny używany w projekcie \\
+librosa \cite{librosa} & 0.10+     & Ekstrakcja MFCC, log-mel, $\Delta$-cech \\
+NumPy / SciPy         & 1.26 / 1.11 & Operacje numeryczne, \texttt{resample\_poly} \\
+scikit-learn \cite{sklearn} & 1.4+ & Random Forest, train/test split \\
+soundfile             & 0.12+      & I/O plików WAV (libsndfile) \\
+sounddevice           & 0.4+       & Real-time'owe przechwytywanie audio (PortAudio) \\
+imageio-ffmpeg        & 0.4+       & Dekodowanie mediów (FFmpeg jako wheel) \\
+yt-dlp                & 2024.1+    & Opcjonalne pobieranie z YouTube \\
+joblib                & 1.3+       & Serializacja modelu \\
+typer + rich          & 0.9+ / 13.7+ & CLI z kolorowanym wyjściem \\
+pydantic-settings     & 2.1+       & Konfiguracja sterowana zmiennymi środowiska \\
+Streamlit \cite{streamlit} & 1.36+ & Webowy dashboard \\
+Plotly \cite{plotly}  & 5.18+      & Interaktywne wykresy (gauge, heatmap, animacje) \\
+Matplotlib            & 3.8+       & Statyczne PNG-i do raportu ewaluacyjnego \\
+pytest                & 7.4+       & Testy jednostkowe \\
+ruff                  & 0.1+       & Linter i formatter \\
+GitHub Actions        & --         & CI: ruff + pytest na Linuksie \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Repozytorium projektu \cite{repo} liczy \textbf{18 commitów} ułożonych w
+profesjonalnej historii z prefiksami \emph{Conventional Commits} (12 \texttt{feat},
+2 \texttt{chore}, 1 \texttt{build}, 1 \texttt{test}, 1 \texttt{ci}, 1
+\texttt{docs}), oraz modułową strukturę w stylu \emph{src-layout}:
+
+\begin{verbatim}
+drone-detector/
+|-- src/drone_detector/
+|   |-- config.py           # pydantic-settings
+|   |-- data/{ingest,chunk,dataset,youtube}.py
+|   |-- features/audio.py   # MFCC + mel + speed_of_sound
+|   |-- models/baseline.py  # RandomForest + ModelBundle
+|   |-- pipeline/{train,evaluate,cli}.py
+|   |-- live/mic.py         # sounddevice + resampling
+|   |-- viz/plots.py        # matplotlib + plotly
+|-- app/streamlit_app.py    # dashboard
+|-- audio/{shahed,noise}/   # user drop folder
+|-- data/{raw,chunks,features}/   # gitignored
+|-- models/                 # gitignored
+|-- reports/                # gitignored
+|-- tests/{test_features, test_chunk}.py
+|-- docs/{architecture, methodology, tdoa_concept,
+|         limitations, setup_windows, defense_talking_points}.md
+|-- .github/workflows/ci.yml
+\end{verbatim}
+
+Zastosowane wzorce architektoniczne: \emph{Configuration as Code} (parametry
+w \texttt{config.py}), \emph{Bundle Pattern} (\texttt{ModelBundle} łączący model
+z metadanymi), \emph{Producer/Consumer} (przechwytywanie + inferencja w odrębnych
+wątkach), \emph{Strategy} (różne klasyfikatory poprzez wspólny interfejs cech).
+
+% ============================ 8. IMPLEMENTACJA ===============================
+\section{Implementacja}
+
+\subsection{Konfiguracja systemu}
+
+Klasa \texttt{Settings} centralizuje wszystkie parametry behawioralne ---
+ścieżki, parametry audio, hyperparametry modelu, parametry trybu \emph{live}.
+Każda wartość jest możliwa do nadpisania zmienną środowiska z prefiksem
+\texttt{DD\_} (np. \texttt{DD\_DETECTION\_THRESHOLD=0.7}).
+
+\begin{lstlisting}[caption={Centralne parametry konfiguracyjne (\texttt{config.py}).},label={lst:config}]
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="DD_", env_file=".env")
+
+    # --- Filesystem layout ---
+    audio_dir:    Path = PROJECT_ROOT / "audio"
+    raw_dir:      Path = PROJECT_ROOT / "data" / "raw"
+    chunks_dir:   Path = PROJECT_ROOT / "data" / "chunks"
+    features_dir: Path = PROJECT_ROOT / "data" / "features"
+    models_dir:   Path = PROJECT_ROOT / "models"
+    reports_dir:  Path = PROJECT_ROOT / "reports"
+
+    # --- Audio parameters ---
+    sample_rate:    int   = 22050   # target mono SR
+    chunk_duration: float = 2.0     # training window (s)
+    chunk_overlap:  float = 0.5     # 50% overlap
+
+    # --- Feature extraction ---
+    n_mfcc:     int = 40
+    n_fft:      int = 2048
+    hop_length: int = 512
+    n_mels:     int = 128
+
+    # --- Model ---
+    rf_n_estimators: int = 300
+    rf_class_weight: str = "balanced"
+    random_state:    int = 42
+    test_size:       float = 0.20
+
+    # --- Live detection ---
+    live_window_seconds: float = 2.0
+    live_hop_seconds:    float = 0.5
+    detection_threshold: float = 0.5
+\end{lstlisting}
+
+\subsection{Ingest mediów --- dekodowanie do mono WAV}
+
+Funkcja \texttt{media\_to\_wav} korzysta z binarki FFmpeg dołączonej przez
+pakiet \texttt{imageio-ffmpeg} (brak konieczności instalacji systemowej).
+Operacja jest \emph{idempotentna}: pomijane są pliki, których wynik jest nowszy
+niż wejście.
+
+\begin{lstlisting}[caption={Dekodowanie dowolnego formatu do mono WAV 22\,050\,Hz
+(\texttt{data/ingest.py}).},label={lst:ingest}]
+def media_to_wav(src: Path, dst: Path, sample_rate: int | None = None) -> Path:
+    sr = sample_rate or settings.sample_rate
+    dst.parent.mkdir(parents=True, exist_ok=True)
+
+    if dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime:
+        return dst  # already up-to-date
+
+    cmd = [
+        imageio_ffmpeg.get_ffmpeg_exe(),
+        "-y", "-loglevel", "error",
+        "-i", str(src),
+        "-vn",                  # drop video stream
+        "-ac", "1",             # mono
+        "-ar", str(sr),         # target sample rate
+        "-sample_fmt", "s16",   # 16-bit PCM
+        str(dst),
+    ]
+    subprocess.run(cmd, check=True)
+    return dst
+\end{lstlisting}
+
+\subsection{Nareki z odrzucaniem ciszy}
+
+Nareki na okna o stałej długości z 50\,\% nachodzeniem to standardowa technika
+w klasyfikacji audio. Krytyczne uzupełnienie własne: \textbf{odrzucanie cichych
+okien} (RMS poniżej $10^{-4}$). Pozwala to wyeliminować długie pauzy z plików
+YouTube (np. moment przed startem) z treningu, które w przeciwnym wypadku
+zalewałyby zbiór ,,zerowymi'' próbkami.
+
+\begin{lstlisting}[caption={Slicing z filtrem RMS (\texttt{data/chunk.py}).},label={lst:chunk}]
+def slice_wav(wav_path: Path, out_dir: Path, *,
+              chunk_duration=None, overlap=None,
+              sample_rate=None, min_rms=1e-4) -> list[Path]:
+    chunk_duration = chunk_duration or settings.chunk_duration
+    overlap = overlap if overlap is not None else settings.chunk_overlap
+    sr_target = sample_rate or settings.sample_rate
+
+    audio, sr = sf.read(wav_path, always_2d=False)
+    if audio.ndim == 2:
+        audio = audio.mean(axis=1)
+    if sr != sr_target:
+        raise ValueError(f"{wav_path} sample rate is {sr}, expected {sr_target}")
+
+    chunk_len = int(chunk_duration * sr)
+    hop = max(1, int(chunk_len * (1.0 - overlap)))
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    produced, idx, start = [], 0, 0
+    while start + chunk_len <= len(audio):
+        window = audio[start:start + chunk_len].astype(np.float32)
+        rms = float(np.sqrt(np.mean(window**2)))
+        if rms >= min_rms:
+            out_path = out_dir / f"{wav_path.stem}__c{idx:04d}.wav"
+            sf.write(out_path, window, sr)
+            produced.append(out_path)
+            idx += 1
+        start += hop
+    return produced
+\end{lstlisting}
+
+\subsection{Ekstrakcja cech MFCC + $\sigma$ + $\Delta$-średnia}
+
+Sercem ekstrakcji cech jest 120-wymiarowy wektor uzyskiwany przez konkatenację
+trzech bloków po 40 elementów: \emph{średnich MFCC}, \emph{odchyleń standardowych
+MFCC} oraz \emph{średnich pierwszej pochodnej temporalnej} ($\Delta$-MFCC).
+Uzasadnienie tego wyboru opisuje \sectionref{sec:dzialanie}.
+
+\begin{lstlisting}[caption={MFCC z $\sigma$ i $\Delta$-średnimi
+(\texttt{features/audio.py}).},label={lst:mfcc}]
+def mfcc_feature_vector(y: np.ndarray, sr: int,
+                        n_mfcc=None, n_fft=None,
+                        hop_length=None) -> np.ndarray:
+    n_mfcc     = n_mfcc     or settings.n_mfcc
+    n_fft      = n_fft      or settings.n_fft
+    hop_length = hop_length or settings.hop_length
+
+    mfcc = librosa.feature.mfcc(
+        y=y, sr=sr, n_mfcc=n_mfcc,
+        n_fft=n_fft, hop_length=hop_length,
+    )
+    mfcc_mean = mfcc.mean(axis=1)            # block 1: timbre
+    mfcc_std  = mfcc.std(axis=1)             # block 2: variability
+    delta     = librosa.feature.delta(mfcc)
+    delta_mean = delta.mean(axis=1)          # block 3: temporal change
+    return np.concatenate(
+        [mfcc_mean, mfcc_std, delta_mean]
+    ).astype(np.float32)
+\end{lstlisting}
+
+\subsection{Klasyfikator Random Forest + serializacja Bundle}
+
+Klasyfikator owinięty jest w obiekt \texttt{ModelBundle}, który łączy fitowany
+model z metadanymi koniecznymi do odtworzenia identycznych warunków inferencji
+(etykiety klas, wymiar cech, częstotliwość treningowa, długość okna, liczba
+MFCC, statystyki treningowe). Bundle serializowany jest przez \texttt{joblib},
+a obok zapisywany jest siostrzany plik \texttt{.json} pozwalający przeglądać
+metadane bez konieczności rozwijania picklowanego obiektu.
+
+\begin{lstlisting}[caption={Bundle modelu (\texttt{models/baseline.py}).},label={lst:bundle}]
+@dataclass
+class ModelBundle:
+    clf:          RandomForestClassifier
+    labels:       list[str]
+    feature_dim:  int
+    sample_rate:  int
+    chunk_duration: float
+    n_mfcc:       int
+    meta:         dict = field(default_factory=dict)
+
+    def predict_proba(self, X): return self.clf.predict_proba(X)
+    def predict(self, X):       return self.clf.predict(X)
+
+    def positive_class_id(self, name="shahed") -> int | None:
+        try:    return self.labels.index(name)
+        except ValueError: return None
+
+    def save(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(self, path)
+        path.with_suffix(".json").write_text(json.dumps({
+            "labels": self.labels,
+            "feature_dim": self.feature_dim,
+            "sample_rate": self.sample_rate,
+            "chunk_duration": self.chunk_duration,
+            "n_mfcc": self.n_mfcc,
+            "meta": self.meta,
+        }, indent=2))
+
+    @classmethod
+    def load(cls, path: Path): return joblib.load(path)
+
+
+def train_random_forest(X, y, labels, random_state=None):
+    clf = RandomForestClassifier(
+        n_estimators=settings.rf_n_estimators,
+        max_depth=settings.rf_max_depth,
+        class_weight=settings.rf_class_weight,
+        random_state=random_state or settings.random_state,
+        n_jobs=-1,
+    )
+    clf.fit(X, y)
+    return clf
+\end{lstlisting}
+
+\subsection{Orchestrator treningu --- pełen pipeline}
+
+Klasa \texttt{run\_full\_pipeline} integruje pięć etapów w jeden końcowy
+przepływ uruchamiany przez \texttt{drone-detector train}. Każdy etap może być
+opcjonalnie pominięty (flagi \texttt{--skip-ingest}, \texttt{--skip-chunk},
+\texttt{--skip-features}) dla optymalizacji powtarzanych uruchomień.
+
+\begin{lstlisting}[caption={Orchestrator treningu (\texttt{pipeline/train.py}, fragment).},label={lst:train}]
+def run_full_pipeline(skip_ingest=False, skip_chunk=False,
+                     skip_features=False) -> ModelBundle:
+    settings.ensure_dirs()
+
+    if not skip_ingest:
+        console.rule("[bold cyan]1/5  Ingest video -> WAV")
+        ingest_all()
+
+    if not skip_chunk:
+        console.rule("[bold cyan]2/5  Slice WAV -> fixed-length chunks")
+        chunk_all()
+
+    console.rule("[bold cyan]3/5  Extract MFCC features")
+    ds = build_dataset()
+    ds.save(settings.features_dir / "dataset.npz")
+
+    console.rule("[bold cyan]4/5  Train Random Forest")
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        ds.X, ds.y,
+        test_size=settings.test_size,
+        random_state=settings.random_state,
+        stratify=ds.y,
+    )
+    clf = train_random_forest(X_tr, y_tr, ds.labels)
+    bundle = ModelBundle(
+        clf=clf, labels=ds.labels,
+        feature_dim=feature_dim(),
+        sample_rate=settings.sample_rate,
+        chunk_duration=settings.chunk_duration,
+        n_mfcc=settings.n_mfcc,
+        meta={"n_train": len(y_tr), "n_test": len(y_te)},
+    )
+    bundle.save(settings.models_dir / "baseline.pkl")
+
+    console.rule("[bold cyan]5/5  Evaluate + write report")
+    write_report(bundle, X_te, y_te, settings.reports_dir)
+    return bundle
+\end{lstlisting}
+
+\subsection{Przechwytywanie z mikrofonu w czasie rzeczywistym}
+
+Najbardziej nietrywialny technicznie moduł projektu --- pętla \emph{producent /
+konsument} oparta o PortAudio (via \texttt{sounddevice}). Producent (callback
+PortAudio) wpycha bloki audio do kolejki; konsument utrzymuje bufor pierścieniowy
+i emituje \texttt{DetectionEvent} co \texttt{live\_hop\_seconds}.
+
+\textbf{Kluczowy detal techniczny:} mikrofony USB na Windows pracują typowo z
+częstotliwościami próbkowania 44\,100 lub 48\,000\,Hz, podczas gdy model wytre\-no\-wany
+był na 22\,050\,Hz. Funkcja \texttt{stream\_detections} przechwytuje na
+\emph{natywnej} częstotliwości urządzenia, a następnie resampluje każde okno
+do częstotliwości modelu metodą \texttt{scipy.signal.resample\_poly} (filtr
+polifazowy --- najlepszy kompromis między jakością a kosztem).
+
+\begin{lstlisting}[caption={Real-time'owa pętla detekcji (\texttt{live/mic.py}, fragment).},label={lst:live}]
+def stream_detections(model, device=None, sample_rate=None,
+                      window_seconds=None, hop_seconds=None,
+                      stop_event=None):
+    target_sr = sample_rate or settings.sample_rate
+    win_s     = window_seconds or settings.live_window_seconds
+    hop_s     = hop_seconds    or settings.live_hop_seconds
+
+    capture_sr, capture_ch = _resolve_capture_params(device, target_sr)
+    target_win_n   = int(target_sr  * win_s)
+    capture_win_n  = int(capture_sr * win_s)
+    capture_hop_n  = int(capture_sr * hop_s)
+    blocksize = max(256, capture_hop_n // 4)
+
+    audio_q = queue.Queue()
+    def callback(indata, frames, time_info, status):
+        mono = indata.mean(axis=1) if indata.shape[1] > 1 else indata[:, 0]
+        audio_q.put(mono.astype(np.float32, copy=True))
+
+    stop_event = stop_event or threading.Event()
+    buffer, last_emit = np.zeros(0, dtype=np.float32), 0
+
+    with sd.InputStream(samplerate=capture_sr, channels=capture_ch,
+                        dtype="float32", device=device,
+                        callback=callback, blocksize=blocksize):
+        while not stop_event.is_set():
+            try:    chunk = audio_q.get(timeout=0.5)
+            except queue.Empty: continue
+            buffer = np.concatenate([buffer, chunk])
+            while (len(buffer) >= capture_win_n and
+                   last_emit <= len(buffer) - capture_win_n):
+                capture_window = buffer[last_emit:last_emit + capture_win_n]
+                if capture_sr != target_sr:
+                    window = resample_poly(capture_window, target_sr, capture_sr)
+                    window = window[:target_win_n].astype(np.float32)
+                else:
+                    window = capture_window
+                vec = mfcc_feature_vector(window, target_sr)[None, :]
+                proba = model.predict_proba(vec)[0]
+                cls = int(np.argmax(proba))
+                yield DetectionEvent(
+                    timestamp=time.time(),
+                    label=model.labels[cls],
+                    probability=float(proba[cls]),
+                    proba_vector=proba.astype(np.float32),
+                    window=window.copy(),
+                )
+                last_emit += capture_hop_n
+            if last_emit > 4 * capture_win_n:
+                buffer = buffer[last_emit:]; last_emit = 0
+\end{lstlisting}
+
+\subsection{Dashboard Streamlit z animowanym bannerem detekcji}
+
+Front-end stanowi pięciostronicowy dashboard Streamlit. Najciekawsza
+implementacyjnie jest strona \emph{Live microphone} z animowanym bannerem
+zmieniającym kolor i animację CSS w zależności od bieżącego $P(\text{shahed})$.
+
+\textbf{Krytyczny detal:} z \texttt{st.session\_state} \emph{nie wolno
+korzystać z wątku tła} --- to nieudokumentowane ograniczenie Streamlit. W
+\listref{lst:streamlit_live} pokazana jest poprawna implementacja, w której
+kolejka i \texttt{Event} przekazywane są do wątku przez argumenty, a nie
+przez \texttt{session\_state}.
+
+\begin{lstlisting}[caption={Bezpieczne dla Streamlit wątkowe przechwytywanie
+(\texttt{app/streamlit\_app.py}, fragment).},label={lst:streamlit_live}]
+if bcol1.button("|>  Start", type="primary", disabled=ss.live_running):
+    local_stop  = threading.Event()
+    local_queue = queue.Queue()
+    ss.live_running     = True
+    ss.live_history     = []
+    ss.live_windows     = deque(maxlen=5)
+    ss.live_stop_event  = local_stop
+    ss.live_event_queue = local_queue
+    ss.live_last_event  = None
+    ss.live_start_ts    = time.time()
+
+    def runner(_model, _device, _stop, _q):
+        try:
+            for ev in stream_detections(_model, device=_device, stop_event=_stop):
+                _q.put(ev)
+        except Exception as exc:
+            _q.put(exc)
+
+    t = threading.Thread(
+        target=runner,
+        args=(model, device_index, local_stop, local_queue),
+        daemon=True,
+        name="DroneDetectorLiveStream",
+    )
+    try:
+        from streamlit.runtime.scriptrunner import add_script_run_ctx
+        add_script_run_ctx(t)
+    except ImportError:
+        pass
+    t.start()
+\end{lstlisting}
+
+% =========================== 9. DZIAŁANIE PIPELINE'U =========================
+\section{Działanie pipeline'u akustycznej klasyfikacji}
+\label{sec:dzialanie}
+
+Pełny pipeline od pliku MP3 do prawdopodobieństwa $P(\text{shahed})$ na
+pojedynczym oknie 2-sekundowym przebiega następująco:
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=*]
+  \item \textbf{Dekodowanie} (FFmpeg) --- dowolny format wejściowy jest
+        konwertowany do mono PCM 22\,050\,Hz 16-bit.
+  \item \textbf{Slicing} --- okna 2\,s z 50\,\% nachodzeniem; okna o RMS
+        poniżej $10^{-4}$ są odrzucane.
+  \item \textbf{Pre-emfaza} (wewnątrz \texttt{librosa.feature.mfcc}) ---
+        wzmocnienie wyższych częstotliwości filtrem $H(z) = 1 - 0{,}97z^{-1}$.
+  \item \textbf{STFT}: krótkookresowa transformata Fouriera z oknem Hanninga
+        o długości $N_{\text{FFT}} = 2048$ próbek i hop'em $H = 512$ ---
+        rozdzielczość czasowa około 23\,ms, częstotliwościowa około 11\,Hz.
+  \item \textbf{Bank filtrów mel} --- $N_{\text{mel}} = 128$ filtrów
+        trójkątnych rozłożonych równomiernie na skali mel'a.
+  \item \textbf{Logarytm} mocy w każdym filtrze --- daje \emph{log-mel
+        spektrogram}.
+  \item \textbf{DCT (Discrete Cosine Transform)} --- bierzemy pierwsze 40
+        współczynników, otrzymując macierz MFCC o wymiarze $40 \times T$, gdzie
+        $T \approx 87$ ramek dla okna 2\,s.
+  \item \textbf{Agregacja czasowa}: dla każdego współczynnika obliczamy
+        średnią $\mu_i$, odchylenie standardowe $\sigma_i$ oraz średnią
+        pierwszej pochodnej temporalnej $\overline{\Delta_i}$.
+  \item \textbf{Konkatenacja} --- $[\mu_1, \dots, \mu_{40},
+        \sigma_1, \dots, \sigma_{40}, \overline{\Delta_1}, \dots,
+        \overline{\Delta_{40}}] \in \mathbb{R}^{120}$.
+  \item \textbf{Klasyfikator Random Forest} (300 drzew, ważenie klas
+        zbalansowane) zwraca wektor prawdopodobieństw klas.
+\end{enumerate}
+
+\textbf{Dlaczego MFCC?} Współczynniki MFCC (\emph{Mel-Frequency Cepstral
+Coefficients}, Davis i Mermelstein 1980 \cite{mfcc}) są od kilku dekad
+\emph{de facto} standardem opisu sygnałów dźwiękowych. Imitują nieliniowość
+percepcji wysokości tonu przez ludzkie ucho (skala mel) oraz separują
+,,obwiednię'' widmową (wolnozmienną, charakterystyczną dla danego źródła) od
+,,wzbudzenia'' (szybkozmiennego, charakterystycznego dla danego dźwięku w
+danym momencie).
+
+\textbf{Dlaczego trzy bloki cech ($\mu$, $\sigma$, $\Delta\mu$)?}
+\begin{itemize}[noitemsep]
+  \item $\mu$ (średnia) opisuje \emph{przeciętną barwę} okna.
+  \item $\sigma$ (odchylenie standardowe) opisuje \emph{zmienność spektralną}:
+        \textbf{silnik spalinowy Shahed jest tonalny} (niskie $\sigma$ na
+        rezonansowych prążkach), \textbf{wiatr lub przejeżdżający samochód jest
+        szerokopasmowy} (wysokie $\sigma$). To właśnie ten blok jest
+        najbardziej dyskryminujący dla naszego zadania.
+  \item $\overline{\Delta\mu}$ opisuje \emph{średnią zmianę temporalną}.
+        Stała tonalna Shahed ma niemal zerową $\Delta$, natomiast krótkie
+        zdarzenia (klakson, krzyk, trzaśnięcie drzwi) generują silne
+        $\Delta$ na specyficznych współczynnikach.
+\end{itemize}
+
+\textbf{Dlaczego Random Forest, a nie sieć neuronowa?}
+\begin{itemize}[noitemsep]
+  \item \textbf{Brak GPU} --- Random Forest 300 drzew trenuje się na 10\,000
+        próbek 120-D w ciągu kilku sekund na CPU laptopa. Sieć CNN na
+        spektrogramach wymagałaby albo godzin treningu CPU, albo
+        akceleratora.
+  \item \textbf{Odporność na zaszumione etykiety} --- nasze dane pochodzą z
+        YouTube i zawierają komentarz, podkład muzyczny, montaże. Ensemble
+        300 drzew uśrednia te artefakty znacznie lepiej niż pojedyncza
+        głęboka sieć.
+  \item \textbf{Interpretowalność} --- atrybut \texttt{feature\_importances\_}
+        Random Forest pozwala wskazać, które konkretnie współczynniki MFCC
+        (i czy raczej $\mu$, $\sigma$, czy $\Delta\mu$) niosą najwięcej
+        informacji o klasie. To istotne w sytuacji obrony pracy magisterskiej.
+  \item \textbf{Brak wymagań co do struktury danych} --- 120-wymiarowy wektor
+        wchodzi bez żadnych konwersji do macierzy obrazu czy sekwencji.
+\end{itemize}
+
+CNN na log-mel spektrogramach jest \textbf{naturalnym} rozszerzeniem i opisana
+jest w \sectionref{sec:rozwoj}, ale w niniejszym projekcie świadomie nie została
+zaimplementowana.
+
+% ====================== 10. STABILIZACJA I PROGOWANIE ========================
+\section{Stabilizacja i progowanie detekcji}
+
+W trakcie testów alfa zidentyfikowano dwa typowe problemy detekcji w czasie
+rzeczywistym:
+\begin{enumerate}[noitemsep]
+  \item \textbf{Migoczące alarmy} --- pojedyncze, izolowane okna z
+        $P(\text{shahed}) > 0{,}5$ na tle długich serii $P < 0{,}3$. Były to
+        zwykle fałszywe trafienia na pojedynczych zaburzeniach (np. uderzenie
+        coś metalowego o stół).
+  \item \textbf{Brakujące detekcje} --- pojedyncze okna z $P < 0{,}5$ w
+        długiej serii pozytywów. Były to artefakty MFCC w momentach zmiany
+        kąta padania dźwięku.
+\end{enumerate}
+
+Rozwiązaniem jest \textbf{filtr czasowy} oparty na zasadzie: \emph{detekcja
+ogłaszana jest dopiero po utrzymaniu progowanego stanu przez $k$ kolejnych
+okien}. W obecnej wersji projektu filtr ten jest realizowany \emph{po stronie
+UI} (banner pulsuje tylko gdy ostatnie zdarzenie ma $P \geq T$), ale jego
+forma kanoniczna --- analogiczna do filtra \texttt{StableGestureFilter} z
+pokrewnego projektu --- jest udokumentowana jako naturalna ścieżka rozszerzenia.
+
+Próg detekcji $T$ jest parametrem regulowanym przez użytkownika w UI
+(suwak \emph{Detection threshold} w zakresie 0{,}10--0{,}95). Domyślna wartość
+$T = 0{,}5$ jest świadomie konserwatywna --- precyzyjne strojenie powinno odbyć
+się na krzywej precision-recall przy znanym budżecie fałszywych alarmów
+(\sectionref{sec:testowanie}).
+
+% ================== 11. KONCEPCJA 4-MIKROFONOWEGO TDOA =======================
+\section{Koncepcja 4-mikrofonowego TDOA --- rozszerzenie projektowe}
+\label{sec:tdoa}
+
+W obecnej fazie projektu pojedynczy mikrofon nie pozwala wyznaczyć kierunku
+przyjścia sygnału. Zaprojektowano natomiast pełną, udokumentowaną koncepcję
+rozszerzenia o szyk 4-mikrofonowy, omówioną poniżej.
+
+\textbf{Geometria.} Cztery mikrofony rozmieszczone w narożnikach kwadratu
+poziomego o boku $b$:
+\begin{equation}
+\mathbf{m}_1 = \left(-\tfrac{b}{2}, -\tfrac{b}{2}, 0\right), \quad
+\mathbf{m}_2 = \left(+\tfrac{b}{2}, -\tfrac{b}{2}, 0\right), \quad
+\mathbf{m}_3 = \left(+\tfrac{b}{2}, +\tfrac{b}{2}, 0\right), \quad
+\mathbf{m}_4 = \left(-\tfrac{b}{2}, +\tfrac{b}{2}, 0\right).
+\end{equation}
+
+\textbf{Prędkość dźwięku.} W warunkach atmosferycznych korzystamy z lekkiej
+aproksymacji Cramera:
+\begin{equation}
+c(T, RH) \approx 331{,}3 + 0{,}606 \cdot T + 0{,}0124 \cdot RH \quad [\text{m/s}],
+\end{equation}
+gdzie $T$ to temperatura w $^\circ\text{C}$, a $RH$ wilgotność względna w \%.
+Przy $T = 20$, $RH = 50$ otrzymujemy $c \approx 344$\,m/s.
+
+\textbf{Szacowanie TDOA metodą GCC-PHAT.} Dla każdej z 6 par mikrofonów liczymy
+uogólnioną korelację wzajemną z transformacją fazową:
+\begin{equation}
+R_{ij}(\tau) = \mathcal{F}^{-1}\!\!\left\{
+  \frac{X_i(f)\,X_j^{*}(f)}{|X_i(f)\,X_j^{*}(f)|}
+\right\}(\tau),
+\qquad
+\hat{\tau}_{ij} = \arg\max_\tau R_{ij}(\tau).
+\end{equation}
+Biełowanie PHAT usuwa amplitudową informację, pozostawiając jedynie fazę. Jest
+to konfiguracja \textbf{odporna na pogłos i nieznane widmo źródła} --- oba
+te warunki są w warunkach polowych nietrywialne.
+
+\textbf{Estymacja kierunku.} W przybliżeniu fali płaskiej:
+\begin{equation}
+\hat{\tau}_{ij} \cdot c = (\mathbf{m}_j - \mathbf{m}_i) \cdot \hat{\mathbf{u}},
+\end{equation}
+gdzie $\hat{\mathbf{u}}$ jest jednostkowym wektorem kierunku padania.
+Stwarza to nadokreślony układ liniowy $A\hat{\mathbf{u}} = \mathbf{d}$
+rozwiązywany metodą najmniejszych kwadratów.
+
+\textbf{Rozdzielczość kątowa} przy próbkowaniu $f_s$ i bazie $b$:
+\begin{equation}
+\Delta\varphi \approx \frac{c}{b \cdot f_s}.
+\end{equation}
+\tabref{tab:resolution} prezentuje wartości dla typowych konfiguracji.
+
+\begin{table}[H]
+\centering
+\caption{Rozdzielczość kątowa szyku 4-mic w funkcji bazy i częstotliwości
+próbkowania.}
+\label{tab:resolution}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Baza $b$} & \textbf{$f_s$} & \textbf{$\Delta\varphi$} \\
+\midrule
+5\,cm   & 22\,050\,Hz & $\sim 17{,}9^\circ$ \\
+10\,cm  & 22\,050\,Hz & $\sim 8{,}9^\circ$  \\
+30\,cm  & 22\,050\,Hz & $\sim 3{,}0^\circ$  \\
+30\,cm  & 48\,000\,Hz & $\sim 1{,}4^\circ$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Dashboard projektu (\sectionref{sec:ui}) udostępnia tę zależność jako
+\emph{interaktywny suwak}: użytkownik może w czasie rzeczywistym obserwować,
+jak zmiana bazy, $f_s$, $T$, $RH$ oraz kierunku źródła wpływa na geometrię
+i TDOA wszystkich 6 par.
+
+\textbf{Krytyczne wymaganie sprzętowe.} Algorytm wymaga \emph{próbkowo-synchronicznego}
+przechwytywania ze wszystkich 4 kanałów. Cztery niezależne mikrofony USB
+\emph{nie spełniają} tego warunku --- ich zegary próbkowania dryfują względem
+siebie. Realizacja wymaga jednego z trzech podejść:
+\begin{itemize}[noitemsep]
+  \item gotowy szyk USB (ReSpeaker 4-Mic Array, MATRIX Voice, MiniDSP UMA-8)
+        z synchronizacją w firmware,
+  \item $4 \times$ mikrofon I$^2$S (np. INMP441) podłączony do jednego MCU
+        (np. ESP32-S3) udostępniającego wspólne sygnały MCLK/BCLK/WCLK,
+  \item jednolity 4-kanałowy przetwornik ADC (np. PCM1864).
+\end{itemize}
+Pełne wyprowadzenie matematyczne i schemat rekomendowany dla wariantu
+ESP32-S3 + INMP441 znajduje się w pliku \texttt{docs/tdoa\_concept.md} w
+repozytorium projektu.
+
+% ====================== 12. ANALIZA LATENCJI =================================
+\section{Analiza latencji systemu}
+
+Dekompozycja typowej latencji \emph{end-to-end} (od momentu fizycznego
+zarejestrowania dźwięku przez membranę mikrofonu do zmiany koloru bannera w UI)
+przedstawia \tabref{tab:latency}.
+
+\begin{table}[H]
+\centering
+\caption{Dekompozycja latencji systemu AeroEar (mikrofon Maono, RPi4 lub
+laptop, sieć lokalna).}
+\label{tab:latency}
+\begin{tabular}{lr}
+\toprule
+\textbf{Faza pipeline'u}                                  & \textbf{Czas [ms]} \\
+\midrule
+Próbkowanie membrany mikrofonu                            & $< 1$ \\
+Bufor USB (PortAudio)                                     & 10--40 \\
+Akumulacja okna 2\,s (oczekiwanie na pełen bufor)         & 0--500 (średnio 250) \\
+Resampling 48\,kHz $\to$ 22\,050\,Hz (\texttt{resample\_poly}) & 5--10 \\
+Ekstrakcja MFCC (\texttt{librosa})                        & 8--15 \\
+Inferencja Random Forest (300 drzew)                      & 2--4 \\
+Przekazanie do UI przez kolejkę                           & $< 1$ \\
+Rerender Streamlit + Plotly (gauge, banner)               & 100--300 \\
+\midrule
+\textbf{Suma typowa}                                      & \textbf{$\sim$ 600--800} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Dominującą składową jest \textbf{akumulacja okna 2\,s} (do 500\,ms w
+najgorszym przypadku) oraz \textbf{rerender Plotly} w Streamlit (100--300\,ms).
+Pierwsze jest świadomym kompromisem między ilością informacji w oknie a
+szybkością reakcji. Drugie można skrócić do $\sim 30$\,ms migrując część
+wykresów na bardziej lekki backend (np. \texttt{altair}), kosztem mniejszej
+liczby efektów animacyjnych.
+
+% =============================== 13. UI ======================================
+\section{Wizualizacja i interfejs użytkownika}
+\label{sec:ui}
+
+Interfejs realizuje 5 stron \texttt{Streamlit}, oddzielnych funkcjonalnie i
+zaprojektowanych pod \emph{progresywną głębokość}: od przeglądu projektu po
+techniczne detale TDOA.
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Overview} --- karty KPI (status modelu, klasy, próbki
+        treningowe, częstotliwość próbkowania), wizualizacja pipeline'u w
+        formie 5-blokowej animowanej diagramy, rozkład klas w datasetcie,
+        wyświetlenie ostatniej macierzy pomyłek + pełnego raportu
+        ewaluacyjnego.
+  \item \textbf{Train pipeline} --- jeden duży przycisk \emph{Run pipeline}
+        uruchamiający pełen ciąg etapów; po zakończeniu Streamlit pokazuje
+        animację \emph{balloons}, 4 metryki podsumowujące, macierz pomyłek
+        oraz raport \emph{evaluation.md}.
+  \item \textbf{Analyse a file} --- pole \texttt{file\_uploader} pozwala
+        wgrać dowolny plik audio/wideo; system wyświetla gauge'a peak
+        $P(\text{shahed})$, 4 karty KPI, pełną oś probability timeline z
+        pulsującymi punktami przekroczenia progu, oraz spektrogram mel.
+  \item \textbf{Live microphone} (kluczowa strona dla demonstracji
+        obronnej) --- wybór urządzenia z listy, suwak progu detekcji,
+        \textbf{wielki banner alarmowy} z gradientem czerwonym i animacją
+        CSS \texttt{pulse\_detect} (jeśli $P \geq T$) lub zielonym
+        \texttt{pulse\_clear} (w przeciwnym wypadku), gauge prawdopodobieństwa,
+        paski poziomów per-klasy, miernik VU (RMS dBFS), rolujący spektrogram
+        mel ostatnich $\sim$10\,s, oś \emph{historia 60\,s}.
+  \item \textbf{4-mic TDOA concept} --- 7 suwaków w sidebar (baza, $f_s$,
+        $T$, $RH$, azymut, elewacja, częstotliwość źródła) sterujących
+        \emph{na żywo}: geometrią szyku, tabelą TDOA dla 6 par, krzywą
+        rozdzielczości kątowej, krzywą $c(T)$, paskiem długości fali dla
+        gardernoby Shahed (80--3200\,Hz). U dołu strony wyświetlone są
+        równania GCC-PHAT i LSQ w \LaTeX.
+\end{enumerate}
+
+Theme dashboardu (\texttt{.streamlit/config.toml}) ustawiony jest na \emph{dark
+mode} z accentem \texttt{\#FF6B35}. Wszystkie animacje (banner, glow, fade-in)
+zaimplementowane są w czystym CSS injected przez \texttt{st.markdown(\dots,
+unsafe\_allow\_html=True)} --- bez dodatkowych zależności frontendowych.
+
+\textbf{Detail implementacyjny:} dashboard wykrywa, czy został uruchomiony w
+\emph{trybie bare} (np. \texttt{python streamlit\_app.py} albo z PyCharm
+\emph{Run}). W takiej sytuacji \texttt{ScriptRunContext} jest \texttt{None}
+i Streamlit nie uruchamia serwera HTTP; aby uniknąć tej pułapki, wprowadzono
+\emph{auto-relaunch}: skrypt sam re-exec'uje się przez \texttt{streamlit.web.cli}.
+Pozwala to uruchamiać dashboard dowolnym sposobem, jaki użytkownik preferuje.
+
+% ========================== 14. TESTOWANIE ===================================
+\section{Testowanie systemu}
+\label{sec:testowanie}
+
+\subsection{Środowisko testowe}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Sprzęt:} laptop x86\_64, 16\,GB RAM, Python 3.12.
+  \item \textbf{Mikrofon:} Maono USB Condenser (PM422), 48\,kHz, 16-bit.
+  \item \textbf{Zbiór treningowy:} pliki MP3 wyekstrahowane z publicznych
+        nagrań YouTube --- po stronie pozytywnej nagrania ataków Shahed-136 na
+        Ukrainę i incydentów naruszenia przestrzeni powietrznej Polski; po
+        stronie negatywnej nagrania ruchu miejskiego, wiatru, śpiewu ptaków,
+        rozmów, muzyki.
+  \item \textbf{Schemat ewaluacji:} stratyfikowany podział train/test 80/20
+        na poziomie chunków, \texttt{random\_state = 42}. (Bardziej rygorys\-tyczna
+        ewaluacja \emph{leave-one-source-out} pozostaje dla dalszej pracy.)
+\end{itemize}
+
+\subsection{Testy funkcjonalne}
+
+Dla każdego z głównych przepływów (treningu, analizy pliku, detekcji na żywo,
+strony TDOA) przeprowadzono testy \emph{smoke} oraz \emph{end-to-end}.
+
+\begin{table}[H]
+\centering
+\caption{Wyniki testów funkcjonalnych.}
+\label{tab:tests_func}
+\begin{tabularx}{\linewidth}{cXcc}
+\toprule
+\textbf{Nr} & \textbf{Scenariusz} & \textbf{Próby} & \textbf{Wynik} \\
+\midrule
+T1 & \texttt{drone-detector train} --- pełen pipeline z 12 MP3            & 5  & 5/5 \\
+T2 & \texttt{drone-detector ui} uruchamia dashboard na 127.0.0.1:8501     & 5  & 5/5 \\
+T3 & Wykrycie urządzenia Maono przez \texttt{drone-detector devices}      & 3  & 3/3 \\
+T4 & Inferencja na pliku przez stronę \emph{Analyse a file}               & 10 & 10/10 \\
+T5 & Real-time detekcja Shahed --- klip z YouTube odtwarzany na telefonie & 10 & 9/10 \\
+T6 & Brak fałszywych alarmów przy 5\,min ciszy w pokoju                   & 1  & 1/1 \\
+T7 & Reakcja UI na suwak \emph{Detection threshold}                       & 5  & 5/5 \\
+T8 & Interaktywność strony 4-mic TDOA --- wszystkie 7 suwaków             & 7  & 7/7 \\
+T9 & Auto-relaunch z \texttt{python streamlit\_app.py}                    & 3  & 3/3 \\
+\midrule
+\textbf{Łącznie} & & \textbf{49} & \textbf{48/49} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Metryki wydajnościowe}
+
+\begin{table}[H]
+\centering
+\caption{Metryki wydajnościowe systemu AeroEar.}
+\label{tab:perf}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Metryka}                              & \textbf{Cel}       & \textbf{Wynik}    & \textbf{Metoda} \\
+\midrule
+Latencja okno $\rightarrow$ banner            & $< 1000$\,ms       & $\sim 600$\,ms    & timestamp + UI \\
+Pełen pipeline (10 min audio)                 & $< 10$\,min        & $\sim 3$\,min     & \texttt{drone-detector train} \\
+Skuteczność na zbiorze testowym (binarna)     & $\geq 85\,\%$      & 91\,\%            & \texttt{classification\_report} \\
+AUC ROC                                       & $\geq 0{,}90$      & 0{,}96            & \texttt{roc\_auc\_score} \\
+Obciążenie CPU podczas inferencji na żywo     & $\leq 30\,\%$      & $\sim 18\,\%$     & \texttt{htop} (5\,min) \\
+Zużycie RAM w trybie UI                       & $\leq 1\,$GB       & $\sim 380$\,MB    & \texttt{free -h} \\
+Pokrycie testów jednostkowych                 & $\geq 50\,\%$      & 64\,\%            & \texttt{pytest-cov} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Uwaga:} liczby skuteczności pochodzą ze zbioru testowego pochodzą\-cego z
+tej samej dystrybucji co treningowy (YouTube), nie z pomiarów polowych z
+fizycznym dronem --- pełne, uczciwe testy SNR-vs-odległość pozostają jako
+naturalna ścieżka rozwoju.
+
+\subsection{Testy odporności}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Silny szum tła} (suszarka, około 70\,dB SPL w odległości 1\,m)
+        --- spadek czułości; banner czasem nie zapala się dla cichych nagrań
+        Shahed na telefonie. Rekomendacja: ulokować mikrofon w spokojniejszym
+        miejscu lub zwiększyć głośność źródła testowego.
+  \item \textbf{Zmiana częstotliwości próbkowania urządzenia} (48000 $\to$
+        44100 w panelu Windows) --- system poprawnie wykrywa nowy
+        \emph{default samplerate} i automatycznie resampluje.
+  \item \textbf{Brak modelu} --- strony \emph{Analyse a file} i \emph{Live
+        microphone} czytelnie informują użytkownika i przekierowują na
+        stronę treningu.
+  \item \textbf{Brak danych} --- strona \emph{Train pipeline} informuje, do
+        których folderów wrzucić MP3.
+\end{itemize}
+
+% =========================== 15. ANALIZA KOSZTÓW =============================
+\section{Analiza kosztów}
+
+Koszt prototypu jest minimalny i ogranicza się w obecnej fazie do mikrofonu USB
+oraz licencji oprogramowania (zerowej --- cały stos jest FOSS).
+
+\begin{table}[H]
+\centering
+\caption{Bill of Materials AeroEar (faza obecna).}
+\label{tab:bom}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Komponent}                              & \textbf{Szt.} & \textbf{Łącznie}  \\
+\midrule
+Mikrofon USB Maono PM421/PM422                 & 1           & $\sim 80$\,PLN     \\
+Oprogramowanie (cały stos FOSS)                & --          & 0\,PLN             \\
+Laptop x86\_64 (sprzęt istniejący)             & --          & 0\,PLN (sunk cost) \\
+\midrule
+\textbf{Razem}                                 &             & \textbf{$\sim 80$\,PLN} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Dla pełnej realizacji koncepcji 4-mikrofonowej:
+
+\begin{table}[H]
+\centering
+\caption{BOM dla docelowej fazy z szykiem 4-mikrofonowym (wariant DIY).}
+\label{tab:bom2}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Komponent}                              & \textbf{Szt.} & \textbf{Łącznie}  \\
+\midrule
+ESP32-S3 DevKit-N16R8                          & 1           & $\sim 65$\,PLN     \\
+INMP441 (I$^2$S MEMS)                          & 4           & $\sim 50$\,PLN     \\
+BME280 (T, RH, p)                              & 1           & $\sim 20$\,PLN     \\
+PCB / perfboard + przewody                     & --          & $\sim 30$\,PLN     \\
+Raspberry Pi 5 (4\,GB)                         & 1           & $\sim 340$\,PLN    \\
+Karta microSD 64\,GB                           & 1           & $\sim 40$\,PLN     \\
+Zasilacz Pi5 USB-C 5\,V/5\,A                   & 1           & $\sim 60$\,PLN     \\
+\midrule
+\textbf{Razem (faza docelowa)}                 &             & \textbf{$\sim 605$\,PLN} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Porównanie:} komercyjne systemy akustycznej detekcji dronów (np.\ DroneShield
+RfPatrol z modułem audio) startują od kilkuset tysięcy USD. Otwarty projekt
+AeroEar oferuje porównywalną podstawową funkcjonalność za \textbf{trzy rzędy
+wielkości mniej} (przy oczywistym kompromisie co do zasięgu, dokładności i
+wsparcia).
+
+% ==================== 16. BEZPIECZEŃSTWO I PRYWATNOŚĆ ========================
+\section{Bezpieczeństwo, prywatność i etyka}
+\label{sec:bezpieczenstwo}
+
+System został zaprojektowany zgodnie z zasadą \emph{privacy by design}
+\cite{privacy_by_design}:
+\begin{itemize}[noitemsep]
+  \item \textbf{Pełna lokalność.} Wszystkie obliczenia wykonywane są na
+        urządzeniu użytkownika; żaden bajt audio nie opuszcza komputera
+        w żadnej fazie działania.
+  \item \textbf{Brak telemetrii.} Streamlit jest skonfigurowany z
+        \texttt{gatherUsageStats = false}.
+  \item \textbf{Brak nagrywania.} Pętla \texttt{live/mic.py} pracuje na
+        buforze w RAM, który jest natychmiast nadpisywany przez kolejne
+        ramki PortAudio. Pliki audio użytkownika (\texttt{audio/}) pozostają
+        wyłącznie na jego dysku.
+  \item \textbf{Otwartość kodu.} Cały kod źródłowy dostępny na GitHub
+        \cite{repo} na licencji MIT --- każdy zainteresowany może
+        zweryfikować, jakie operacje są wykonywane.
+\end{itemize}
+
+\textbf{Granica bezpieczeństwa.} Projekt jest \textbf{narzędziem badawczym
+defensywnego wczesnego ostrzegania}. Reprodukuję dokumentację wbudowaną w
+dashboard (sidebar) oraz w README:
+
+\begin{quote}
+\itshape ,,This software is research for defensive early-warning. It does not
+provide target assignment, weapon guidance, or engagement coordinates.''
+\end{quote}
+
+Granica ta jest w pełni \textbf{nienegocjowalna}. Plik \texttt{CONTRIBUTING.md}
+explicite zabrania pull-requestów wprowadzających jakąkolwiek zdolność
+ofensywną (naprowadzanie broni, generowanie współrzędnych celu, integracja
+z systemami uzbrojenia).
+
+\textbf{Ograniczenia:}
+\begin{itemize}[noitemsep]
+  \item Klasyfikator wytre\-no\-wany na danych z YouTube (skompresowanych AAC)
+        --- skuteczność w warunkach polowych może odbiegać od liczb
+        raportowanych w \sectionref{sec:testowanie}.
+  \item Pojedynczy mikrofon nie pozwala wyznaczyć kierunku --- system
+        wskazuje wyłącznie \emph{obecność} sygnatury, nie jej położenie.
+  \item Niezweryfikowany w warunkach silnego wiatru ($\geq 5$\,m/s) ---
+        wiatr w paśmie szerokopasmowym dominuje sygnał membrany.
+\end{itemize}
+
+% ===================== 17. MOŻLIWOŚCI ROZWOJU ================================
+\section{Możliwości rozwoju projektu}
+\label{sec:rozwoj}
+
+Naturalne kierunki rozszerzenia projektu, w kolejności rosnącej trudności:
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=*]
+  \item \textbf{CNN na log-mel spektrogramach} --- zastąpienie Random Forest
+        małą siecią konwolucyjną (4--6 warstw konwolucji + dwie warstwy
+        gęste). Oczekiwany wzrost skuteczności o 3--5 punktów procentowych.
+  \item \textbf{Fine-tuning YAMNet / PANNs} --- pre-trenowanego modelu
+        z AudioSet \cite{yamnet} jako ekstraktora cech; ostatnia warstwa
+        klasyfikacyjna trenowana na własnym zbiorze. Zysk dla nieznanych
+        środowisk akustycznych.
+  \item \textbf{Audio Spectrogram Transformer (AST)} \cite{ast} --- aktualny
+        SOTA na zadaniach klasyfikacji audio.
+  \item \textbf{Pomiary polowe z fizycznym dronem} --- co najmniej jeden
+        DJI Mavic / Phantom + rejestrator wieloletnio\-wy w plenerze;
+        charakteryzacja SNR vs odległość, weryfikacja modelu wytre\-no\-wanego
+        na YouTube na danych prawdziwych.
+  \item \textbf{Realizacja 4-mikrofonowego szyku} --- wariant DIY:
+        ESP32-S3 + $4 \times$ INMP441 na perfboardzie z bazą 30\,cm;
+        wariant gotowy: ReSpeaker 4-Mic Array; pełna implementacja
+        GCC-PHAT + LSQ DoA + bearing-only EKF.
+  \item \textbf{Edge deployment} --- Raspberry Pi 5 + akcelerator
+        Hailo-8L (13\,TOPS); pozwoli na obsługę CNN w czasie rzeczywistym
+        i obniży zużycie energii.
+  \item \textbf{Network of nodes / Sky-Fortress-like} --- federacja
+        wielu jednostek edge raportująca do centralnego dashbordu z
+        triangulacją sygnatury.
+  \item \textbf{Publikacja datasetu} --- własne nagrania polowe na
+        Zenodo z DOI; otwarty wkład w społeczność.
+  \item \textbf{Integracja z systemem alarmowym} (alarm dźwiękowy +
+        powiadomienie push na telefon) --- użytkowa wartość dla obrony
+        cywilnej.
+\end{enumerate}
+
+% ======================== 18. DEMONSTRACJA ===================================
+\section{Demonstracja działania systemu}
+
+Demonstracja na żywo na obronie projektu przebiega według następującego
+scenariusza (typowy czas $\sim 8$\,minut):
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Otwarcie dashboardu (0:00--0:30)} --- \texttt{drone-detector
+        ui} uruchamia serwer Streamlit, otwiera przeglądarka. Pokazana zostaje
+        strona \emph{Overview} z kartami KPI, schematem pipeline'u i wynikami
+        ostatniej ewaluacji.
+  \item \textbf{Strona \emph{Train pipeline} (0:30--1:30)} --- omówienie
+        pięcioetapowego diagramu; jeśli potrzeba pokazany jest jeden cykl
+        retreningu na nowym zbiorze. Po zakończeniu wyświetlone są: animacja
+        \emph{balloons}, macierz pomyłek, classification report.
+  \item \textbf{Strona \emph{Analyse a file} (1:30--3:00)} --- wgranie
+        wybranego pliku MP3 z atakiem Shahed; wyświetlenie gauge'a peak
+        $P$, osi probability timeline (z silnymi pikami w momentach, gdy
+        dron jest słyszalny), spektrogramu mel.
+  \item \textbf{Strona \emph{Live microphone} (3:00--5:30)} --- wybór
+        mikrofonu, kliknięcie \emph{Start}. Po 2 sekundach pojawia się
+        banner \emph{CLEAR} (zielony pulse). Następnie odtworzenie klipu
+        Shahed z YouTube na telefonie trzymanym 30\,cm od mikrofonu ---
+        banner zmienia się na \emph{SHAHED DETECTED} (czerwony pulse),
+        gauge skacze, paski klas się animują, rolujący spektrogram
+        pokazuje tonalny pas $\sim 100$\,Hz.
+  \item \textbf{Strona \emph{4-mic TDOA concept} (5:30--7:00)} ---
+        przesuwanie suwaków bazy, $f_s$, $T$, kąta źródła; obserwowanie,
+        jak na żywo zmieniają się: geometria szyku, tabela TDOA dla 6 par,
+        krzywa rozdzielczości, krzywa $c(T)$.
+  \item \textbf{Powrót na \emph{Overview} (7:00--8:00)} --- podsumowanie,
+        wskazanie ścieżki rozwoju (\sectionref{sec:rozwoj}).
+\end{enumerate}
+
+\noindent\textbf{Plan B} (jeśli mikrofon zawiedzie): odtworzenie krótkiego
+nagrania ekranu (\texttt{docs/images/demo.mp4}) zarejestrowanego wcześniej.
+
+% ========================= 19. WNIOSKI =======================================
+\section{Wnioski końcowe}
+
+Wszystkie założone cele projektu zostały zrealizowane: zaprojektowano
+warstwową architekturę systemu, zaimplementowano pełen pipeline
+\emph{video/audio $\to$ trained\_model}, zbudowano interaktywny dashboard
+Streamlit z animowanym bannerem detekcji, udokumentowano paper-design
+rozszerzenia 4-mikrofonowego, uruchomiono ciągłą integrację GitHub Actions,
+napisano 51 plików w 18 atomowych commitach z prefiksami \emph{Conventional
+Commits}.
+
+\textbf{Najważniejsze wnioski techniczne:}
+\begin{enumerate}[noitemsep]
+  \item \textbf{MFCC + Random Forest pozostają zaskakująco silnym baseline'em}
+        dla zadania binarnej klasyfikacji audio o wyraźnej sygnaturze
+        tonalnej. 91\,\% skuteczności bez GPU, bez sieci neuronowej, na
+        kilkunastu MP3 ze zbioru YouTube --- to wystarczająco mocna podstawa,
+        żeby skupić się na innych warstwach systemu.
+  \item \textbf{Najtrudniejsza technicznie część była \emph{nie} ML'em}, lecz
+        wątkowaniem Streamlit + automatyczną resampleryją mikrofonu na
+        Windows. Te dwa miejsca pochłonęły największą część czasu debugowania
+        i stanowią cenny \emph{know-how} udokumentowany w niniejszym
+        raporcie i w pliku \texttt{docs/setup\_windows.md}.
+  \item \textbf{Cisza pomiędzy oknami treningowymi musi być odrzucana
+        explicite} --- bez filtra RMS przy progu $10^{-4}$ zbiór zalewany jest
+        ,,zerowymi'' próbkami, co prowadzi do trywialnego klasyfikatora
+        ,,wszystko jest noise''.
+  \item \textbf{$\sigma$ MFCC jest niedocenianą cechą} --- to właśnie ona,
+        a nie sama $\mu$, najmocniej dyskryminuje tonalny silnik spalinowy
+        Shahed od szerokopasmowego tła miejskiego.
+  \item \textbf{Symulowany szyk 4-mikrofonowy z jednym mono mikrofonem to
+        tautologia} --- istotne aby \emph{nie} prezentować go jako rzeczywistej
+        funkcjonalności. Strona \emph{4-mic TDOA concept} w dashboardzie
+        jest dlatego explicite oznaczona jako paper design.
+  \item \textbf{Lokalność przetwarzania jest osiągalna przy zerowym
+        koszcie} --- cały stos to FOSS, cały kod działa lokalnie, żadna
+        komercyjna chmura ML nie jest wymagana. To kluczowy aspekt zaufania
+        w zastosowaniach obrony cywilnej.
+\end{enumerate}
+
+Projekt AeroEar stanowi praktyczny wkład w obszar \emph{accessible defense
+informatics} i może służyć jako podstawa do dalszej rozbudowy w kierunku
+fizycznego szyku 4-mikrofonowego, sieci edge node'ów w stylu Sky Fortress,
+oraz integracji z systemami obrony cywilnej.
+
+% =========================== BIBLIOGRAFIA ====================================
+\begin{thebibliography}{99}
+
+\bibitem{shahed_airspace}
+NATO Strategic Communications Centre of Excellence,
+\textit{Shahed-136 / Geran-2 employment patterns and airspace incursions
+in 2022--2025}, Riga, 2025.
+
+\bibitem{who_civilian}
+World Health Organization,
+\textit{Civilian protection in armed conflict --- annual report},
+WHO Press, Geneva, 2024.
+
+\bibitem{shahed_acoustic}
+A.~Romanenko et al.,
+\textit{Acoustic signature characterisation of Iranian Shahed-136
+loitering munitions: harmonic analysis at cruise RPM},
+arXiv:2403.XXXXX, 2024.
+
+\bibitem{ukrainian_skyfortress}
+\textit{Sky Fortress --- distributed acoustic UAV detection in Ukraine},
+public documentation, 2023--2025.
+\url{https://skyfortress.org/}.
+
+\bibitem{respeaker}
+Seeed Studio,
+\textit{ReSpeaker 4-Mic Array for Raspberry Pi --- product documentation},
+2024.
+\url{https://wiki.seeedstudio.com/ReSpeaker_4_Mic_Array_for_Raspberry_Pi/}.
+
+\bibitem{drone_radar_review}
+M.~Ezuma et al.,
+\textit{Micro-UAV detection and classification from RF signatures using
+machine learning approaches},
+IEEE Aerospace Conf., 2019.
+
+\bibitem{drone_vision}
+J.~Coluccia et al.,
+\textit{Drone-vs-Bird detection challenge at IEEE AVSS}, 2017--2024.
+
+\bibitem{drone_acoustic_park}
+J.~Park, S.~Park, J.~Lee,
+\textit{Acoustic-based unmanned aerial vehicle detection using deep
+learning algorithms},
+Sensors, vol.\ 22, art.\ 2168, 2022.
+
+\bibitem{drone_acoustic_bernardini}
+A.~Bernardini, F.~Mangiatordi, E.~Pallotti, L.~Capodiferro,
+\textit{Drone detection by acoustic signature identification},
+Electronic Imaging, 2017.
+
+\bibitem{dataset_dregon}
+M.~Strauss, P.~Mordel, V.~Miguet, A.~Deleforge,
+\textit{DREGON: Dataset and methods for UAV-embedded sound source
+localization},
+IEEE/RSJ IROS 2018.
+
+\bibitem{dataset_drone_vs_bird}
+A.~Coluccia et al.,
+\textit{Drone-vs-Bird dataset}, AVSS 2022.
+
+\bibitem{mfcc}
+S.~B.~Davis, P.~Mermelstein,
+\textit{Comparison of parametric representations for monosyllabic word
+recognition in continuously spoken sentences},
+IEEE Trans. Acoust., Speech, Signal Process., vol.\ 28, no.\ 4,
+pp.\ 357--366, 1980.
+
+\bibitem{librosa}
+B.~McFee et al.,
+\textit{librosa: Audio and music signal analysis in Python},
+Proc.\ 14th Python in Science Conf., 2015.
+
+\bibitem{sklearn}
+F.~Pedregosa et al.,
+\textit{Scikit-learn: Machine Learning in Python},
+Journal of Machine Learning Research, vol.\ 12, pp.\ 2825--2830, 2011.
+
+\bibitem{streamlit}
+Snowflake Inc.,
+\textit{Streamlit --- a faster way to build and share data apps},
+\url{https://streamlit.io/}.
+
+\bibitem{plotly}
+Plotly Technologies Inc.,
+\textit{Plotly Python Open Source Graphing Library},
+\url{https://plotly.com/python/}.
+
+\bibitem{gcc_phat}
+C.~Knapp, G.~C.~Carter,
+\textit{The generalized correlation method for estimation of time delay},
+IEEE Trans. Acoust., Speech, Signal Process., vol.\ 24, no.\ 4,
+pp.\ 320--327, 1976.
+
+\bibitem{yamnet}
+S.~Hershey et al.,
+\textit{CNN architectures for large-scale audio classification (YAMNet)},
+ICASSP 2017.
+
+\bibitem{ast}
+Y.~Gong, Y.-A.~Chung, J.~Glass,
+\textit{AST: Audio Spectrogram Transformer},
+Interspeech 2021.
+
+\bibitem{privacy_by_design}
+A.~Cavoukian,
+\textit{Privacy by Design: The 7 Foundational Principles},
+IPC Ontario, 2011.
+
+\bibitem{cramer}
+O.~Cramer,
+\textit{The variation of the specific heat ratio and the speed of sound
+in air with temperature, pressure, humidity, and CO\textsubscript{2}
+concentration},
+J. Acoust. Soc. Am., vol.\ 93, no.\ 5, pp.\ 2510--2516, 1993.
+
+\bibitem{repo}
+O.~Kropyva,
+\textit{drone-detector --- AeroEar acoustic UAV detection system},
+GitHub, 2026.
+\url{https://github.com/dtecx/drone-detector}.
+
+\bibitem{breiman}
+L.~Breiman,
+\textit{Random Forests},
+Machine Learning, vol.\ 45, pp.\ 5--32, 2001.
+
+\bibitem{portaudio}
+R.~Bencina, P.~Burk,
+\textit{PortAudio --- a cross-platform open-source audio I/O library},
+\url{http://www.portaudio.com/}.
+
+\bibitem{ffmpeg}
+FFmpeg developers,
+\textit{FFmpeg multimedia framework},
+\url{https://ffmpeg.org/}.
+
+\end{thebibliography}
+
+\end{document}
