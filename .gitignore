@@ -81,5 +81,16 @@ reports/*.md
 # Streamlit cache
 .streamlit/secrets.toml
 
+# --- LaTeX build artefacts (keep the .tex and .pdf, drop the rest) ---
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
+docs/*.lof
+docs/*.lot
+docs/*.fls
+docs/*.fdb_latexmk
+docs/*.synctex.gz
+
 # Keep folder structure
 !.gitkeep

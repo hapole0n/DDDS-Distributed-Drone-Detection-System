@@ -1,6 +1,6 @@
 # Raport końcowy — `raport_koncowy.tex`
 
-LaTeX-owy raport końcowy projektu **AeroEar**, w stylu i strukturze
+LaTeX-owy raport końcowy projektu **DDDS**, w stylu i strukturze
 sprawozdania z laboratorium (na wzór wcześniejszego raportu *waveHome*).
 
 Po skompilowaniu daje **~25-stronicowy** PDF z:

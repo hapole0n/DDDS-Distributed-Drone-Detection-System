@@ -1,5 +1,5 @@
 % =============================================================================
-% AeroEar — system akustycznej detekcji UAV w czasie rzeczywistym
+% DDDS — system akustycznej detekcji UAV w czasie rzeczywistym
 % Raport końcowy projektu z przedmiotu „Programowanie w języku Python"
 % Politechnika Lubelska, Wydział Informatyki i Elektrotechniki
 % Autor: Oleh Kropyva,  IZIwE II – grupa 1.1.2,  Rok akademicki 2025/2026
@@ -27,6 +27,16 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
 
+% Helper: include figure if file exists, else render a labelled placeholder.
+% Two-arg form keeps the macro insensitive to underscores in filenames
+% (a literal `_` in \texttt would otherwise trigger math mode).
+\newcommand{\figureifexists}[2]{%
+  \IfFileExists{#1}%
+    {\includegraphics[width=#2]{#1}}%
+    {\fbox{\parbox[c][6cm][c]{#2}{\centering\itshape\color{codecomment}%
+      [placeholder --- zapisz brakujący zrzut ekranu i przekompiluj]}}}%
+}
+
 % ---------- Kolory motywu projektowego ----------
 \definecolor{accent}{HTML}{FF6B35}
 \definecolor{accent2}{HTML}{FFB23F}
@@ -41,9 +51,9 @@
 % ---------- Linki i odnośniki ----------
 \hypersetup{
   colorlinks=true,
-  linkcolor=accent,
+  linkcolor=black,
   urlcolor=cool,
-  citecolor=accent2,
+  citecolor=black,
 }
 
 % ---------- Nagłówki / stopki ----------
@@ -51,15 +61,15 @@
 \fancyhf{}
 \fancyhead[L]{\footnotesize Programowanie w języku Python --- IZIwE II grupa 1.1.2}
 \fancyhead[R]{\footnotesize O. Kropyva}
-\fancyfoot[L]{\footnotesize mgr inż. A. Wilczyńska}
+\fancyfoot[L]{\footnotesize dr inż. R. Dzierżak}
 \fancyfoot[C]{\thepage}
 \fancyfoot[R]{\footnotesize Rok 2025/2026}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
 
 % ---------- Styl tytułów ----------
-\titleformat{\section}{\Large\bfseries\color{accent}}{\thesection}{0.6em}{}
-\titleformat{\subsection}{\large\bfseries\color{accent!80!black}}{\thesubsection}{0.5em}{}
+\titleformat{\section}{\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.5em}{}
 \titlespacing*{\section}{0pt}{1.4em}{0.6em}
 \titlespacing*{\subsection}{0pt}{1.0em}{0.4em}
 
@@ -111,38 +121,31 @@
 % ============================== STRONA TYTUŁOWA ==============================
 \begin{titlepage}
 \centering
-\vspace*{1.0cm}
+\vspace*{1.5cm}
 
 {\Large\bfseries Politechnika Lubelska}\\[0.2cm]
-{\normalsize Wydział Informatyki i Elektrotechniki}\\[0.2cm]
+{\normalsize Wydział Elektrotechniki i Informatyki}\\[0.2cm]
 {\normalsize Kierunek: Inżynierskie Zastosowania Informatyki w Elektrotechnice (IZIwE) II stopnia}\\[0.2cm]
 {\normalsize Laboratorium / Przedmiot: \textbf{Programowanie w języku Python}}\\[0.2cm]
-{\normalsize Rok akademicki 2025/2026}\\[1.5cm]
+{\normalsize Rok akademicki 2025/2026}\\[1.0cm]
 
 \rule{\linewidth}{0.5mm}\\[0.5cm]
-{\Huge\bfseries\color{accent} AeroEar}\\[0.2cm]
-{\Large System akustycznej detekcji bezzałogowych statków powietrznych\\
+{\Huge\bfseries\color{accent} DDDS}\\[0.20cm]
+{\Large\bfseries\color{accent2} Distributed Drone Detection System}\\[0.35cm]
+{\large System akustycznej detekcji bezzałogowych statków powietrznych\\
 w czasie rzeczywistym na przykładzie klasy Shahed-136}\\[0.4cm]
-\rule{\linewidth}{0.5mm}\\[0.8cm]
+\rule{\linewidth}{0.5mm}\\[1.6cm]
 
-{\large\itshape Sprawozdanie z projektu --- raport końcowy}\\[2.0cm]
+{\Large\itshape Sprawozdanie z projektu --- raport końcowy}\\[2.5cm]
 
 \begin{flushleft}
 \large
-\textbf{Autor:}\hspace{1cm} Oleh Kropyva\\[0.2cm]
-\textbf{Grupa:}\hspace{1.2cm} IZIwE II --- grupa 1.1.2\\[0.2cm]
-\textbf{Prowadzący:}\hspace{0.2cm} mgr inż.\ Aleksandra Wilczyńska\\[0.2cm]
-\textbf{Data oddania:}\hspace{0.1cm} maj 2026\\[0.2cm]
-\textbf{Repozytorium GitHub:} \url{https://github.com/dtecx/drone-detector}\\[0.2cm]
-\textbf{Licencja:}\hspace{0.7cm} MIT
+\textbf{Autor:}\hspace{1cm} Oleh Kropyva\\[0.3cm]
+\textbf{Grupa:}\hspace{1.2cm} IZIwE II --- grupa 1.1.2\\[0.3cm]
+\textbf{Prowadzący:}\hspace{0.2cm} dr inż.\ Róża Dzierżak\\[0.3cm]
+\textbf{Data oddania:}\hspace{0.1cm} maj 2026\\[0.3cm]
+\textbf{Repozytorium GitHub:} \url{https://github.com/hapole0n/DDDS-Distributed-Drone-Detection-System}
 \end{flushleft}
-
-\vfill
-\begin{center}
-\color{accent}\rule{0.4\linewidth}{0.4pt}\\[0.3cm]
-\itshape\small Defensywne badania nad systemami akustycznego wczesnego ostrzegania.\\
-Projekt nie generuje współrzędnych celu, naprowadzania broni ani danych operacyjnych.
-\end{center}
 \end{titlepage}
 
 % ================================== ToC ======================================
@@ -154,7 +157,7 @@ Projekt nie generuje współrzędnych celu, naprowadzania broni ani danych opera
 \addcontentsline{toc}{section}{Streszczenie}
 
 W ramach projektu zaprojektowano i zaimplementowano kompletny system akustycznej
-detekcji bezzałogowych statków powietrznych \textbf{AeroEar}, ze szczególnym
+detekcji bezzałogowych statków powietrznych \textbf{DDDS}, ze szczególnym
 uwzględnieniem przypadku użycia klasy Shahed-136 --- bojowego drona-amunicji
 krążącej napędzanego silnikiem spalinowym, regularnie naruszającego przestrzeń
 powietrzną państw graniczących ze strefą konfliktu rosyjsko-ukraińskiego, w tym
@@ -220,7 +223,24 @@ sensowne, niskobudżetowe uzupełnienie systemów radarowych:
         \cite{ukrainian_skyfortress}.
 \end{itemize}
 
-Przedmiotowy projekt \textbf{AeroEar} jest \emph{programowo-laboratoryjnym}
+Charakterystyczna sygnatura akustyczna silnika spalinowego Shahed-136 ---
+tonalny pas harmonicznych powyżej fundamentu około 100\,Hz --- przedstawia
+\rysref{rys:spectrum}. To właśnie ta wąska, periodyczna struktura widmowa
+(w odróżnieniu od szerokopasmowego świstu wirników multicopterów) jest
+głównym deskryptorem wykorzystywanym przez klasyfikator DDDS.
+
+\begin{figure}[H]
+\centering
+\figureifexists{images/chart_shahed_spectrum.png}{0.95\linewidth}
+\caption{Symulowana sygnatura akustyczna Shahed-136 odpowiadająca silnikowi
+spalinowemu pracującemu przy ok.~6000\,RPM. Fundamentalna częstotliwość
+$f_0 \approx 100$\,Hz oraz $\sim$30 silnych harmonicznych do około 3\,kHz
+tworzą charakterystyczny tonalny ,,grzebień'' łatwo rozróżnialny od
+szerokopasmowego tła miejskiego.}
+\label{rys:spectrum}
+\end{figure}
+
+Przedmiotowy projekt \textbf{DDDS} jest \emph{programowo-laboratoryjnym}
 opracowaniem tego problemu, świadomie ograniczonym do warstwy software'owej i
 pojedynczego mikrofonu (warstwa sprzętowa szyku 4-mikrofonowego pozostaje na
 poziomie projektu na papierze --- \sectionref{sec:tdoa}). Projekt powstał jako
@@ -310,16 +330,16 @@ Wśród istniejących rozwiązań akustycznych warto wymienić:
         \cite{dataset_dregon}, \emph{Drone-vs-Bird} \cite{dataset_drone_vs_bird}.
 \end{itemize}
 
-Pozycjonowanie projektu AeroEar na tle wymienionych rozwiązań przedstawia
+Pozycjonowanie projektu DDDS na tle wymienionych rozwiązań przedstawia
 \tabref{tab:positioning}.
 
 \begin{table}[H]
 \centering
-\caption{Pozycjonowanie projektu AeroEar na tle innych rozwiązań detekcji UAV.}
+\caption{Pozycjonowanie projektu DDDS na tle innych rozwiązań detekcji UAV.}
 \label{tab:positioning}
 \begin{tabularx}{\linewidth}{lXXXX}
 \toprule
-\textbf{Cecha} & \textbf{AeroEar} & \textbf{Sky Fortress} & \textbf{Komercyjny radar} & \textbf{Squarehead} \\
+\textbf{Cecha} & \textbf{DDDS} & \textbf{Sky Fortress} & \textbf{Komercyjny radar} & \textbf{Squarehead} \\
 \midrule
 Otwarty kod źródłowy        & TAK         & cz.         & nie        & nie         \\
 Koszt prototypu             & $\sim$80 PLN & --         & 10$^5$\,USD$+$ & $>$50\,tys.\ USD \\
@@ -381,7 +401,7 @@ moduły kodu.
 
 \begin{table}[H]
 \centering
-\caption{Pięciowarstwowy model architektury AeroEar.}
+\caption{Pięciowarstwowy model architektury DDDS.}
 \label{tab:warstwy}
 \begin{tabularx}{\linewidth}{llX}
 \toprule
@@ -405,47 +425,66 @@ moduły kodu.
 
 \subsection{Schemat przepływu danych}
 
+System realizuje dwa równoległe potoki przetwarzania współdzielące te same
+moduły ekstrakcji cech i klasyfikacji (\rysref{rys:dataflow}).
+\emph{Potok treningowy} przebiega offline od plików MP3 dostarczonych przez
+użytkownika do natrenowanego modelu i raportu ewaluacyjnego. \emph{Potok
+inferencji} pracuje online, przyjmując strumień z mikrofonu USB i emitując
+zdarzenia detekcji do dashboardu.
+
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  node distance=0.55cm and 0.6cm,
-  block/.style={rectangle, draw=accent, line width=0.6pt, rounded corners,
-                fill=accent!5, minimum height=0.85cm, minimum width=2.7cm,
-                align=center, font=\small},
-  arrow/.style={-{Stealth[length=2.4mm,width=2mm]}, line width=0.5pt,
-                draw=black!60},
+  >={Stealth[length=2mm]},
+  every node/.style={font=\scriptsize},
+  blk/.style    ={rectangle, rounded corners=2pt, draw=accent,
+                  fill=accent!6, line width=0.5pt,
+                  minimum width=1.8cm, minimum height=0.75cm,
+                  align=center, inner sep=2pt},
+  src/.style    ={blk, draw=cool,   fill=cool!12},
+  model/.style  ={blk, draw=accent2,fill=accent2!12},
+  outpos/.style ={blk, draw=success,fill=success!12},
+  outdet/.style ={blk, draw=danger, fill=danger!12},
+  ar/.style     ={-{Stealth[length=1.7mm]}, line width=0.45pt, draw=black!55},
+  lab/.style    ={font=\scriptsize\bfseries\itshape},
 ]
-\node[block] (input) {\texttt{audio/<label>/*.mp3}};
-\node[block, right=of input] (ingest) {Ingest\\ (ffmpeg)};
-\node[block, right=of ingest] (chunk) {Chunk\\ 2\,s, 50\,\% ovl};
-\node[block, below=of input] (live) {Mikrofon\\ USB Maono};
-\node[block, right=of live] (resample) {Resample\\ $f_s \to 22050$};
-\node[block, right=of resample] (window) {Okno 2\,s};
-\node[block, right=of chunk] (mfcc1) {MFCC};
-\node[block, right=of window] (mfcc2) {MFCC};
-\node[block, below=0.7cm of mfcc1, draw=accent2] (rf) {Random Forest};
-\node[block, right=of mfcc2] (proba) {$P(\text{shahed})$};
-\node[block, right=of proba, draw=danger, fill=danger!10] (alarm) {Banner\\ DETECT};
-\node[block, above=0.5cm of rf, draw=success, fill=success!10] (report)
-  {raport\\ Confusion matrix};
+% TRAINING row
+\node[src]                       (t0) {audio/*.mp3};
+\node[blk,    right=0.32cm of t0] (t1) {Ingest\\ffmpeg};
+\node[blk,    right=0.32cm of t1] (t2) {Chunk\\2 s · 50\,\%};
+\node[blk,    right=0.32cm of t2] (t3) {MFCC\\120-D};
+\node[model,  right=0.32cm of t3] (t4) {RF\\train};
+\node[outpos, right=0.32cm of t4] (t5) {reports/\\eval.md};
 
-\draw[arrow] (input) -- (ingest);
-\draw[arrow] (ingest) -- (chunk);
-\draw[arrow] (chunk) -- (mfcc1);
-\draw[arrow] (mfcc1) -- (rf);
-\draw[arrow] (rf) -- (report);
-\draw[arrow] (live) -- (resample);
-\draw[arrow] (resample) -- (window);
-\draw[arrow] (window) -- (mfcc2);
-\draw[arrow] (mfcc2) -- (proba);
-\draw[arrow] (proba) -- (alarm);
-\draw[arrow] (rf.east) -- ++(0.4,0) |- (proba.west);
+% INFERENCE row
+\node[src,    below=1.1cm of t0] (l0) {USB mic};
+\node[blk,    right=0.32cm of l0] (l1) {Resample\\$f_s\!\to\!22050$};
+\node[blk,    right=0.32cm of l1] (l2) {Window\\2 s};
+\node[blk,    right=0.32cm of l2] (l3) {MFCC\\120-D};
+\node[model,  right=0.32cm of l3] (l4) {RF\\predict};
+\node[outdet, right=0.32cm of l4] (l5) {Streamlit\\banner};
+
+% Row labels on left
+\node[lab, color=success, anchor=east] at ($(t0.west)+(-0.20,0)$) {TRAIN};
+\node[lab, color=danger,  anchor=east] at ($(l0.west)+(-0.20,0)$) {LIVE};
+
+% Arrows
+\foreach \a/\b in {t0/t1, t1/t2, t2/t3, t3/t4, t4/t5,
+                   l0/l1, l1/l2, l2/l3, l3/l4, l4/l5} {
+    \draw[ar] (\a) -- (\b);
+}
+% Shared-module emphasis (dashed bracket around MFCC + RF)
+\draw[dashed, draw=accent!60, line width=0.4pt, rounded corners=2pt]
+    ($(t3.north west)+(-0.08,0.18)$) rectangle
+    ($(l4.south east)+(0.08,-0.18)$);
+\node[lab, color=accent, anchor=south]
+    at ($(t3.north)!0.5!(t4.north)+(0,0.22)$) {współdzielony stos cech + model};
 \end{tikzpicture}
-\caption{Schemat dwóch równoległych ścieżek danych: \emph{ścieżka treningu}
-(pliki MP3 $\rightarrow$ macierz cech $\rightarrow$ klasyfikator $\rightarrow$
-raport) oraz \emph{ścieżka inferencji w czasie rzeczywistym} (mikrofon
-$\rightarrow$ resampling $\rightarrow$ okno $\rightarrow$ MFCC $\rightarrow$
-predykcja $\rightarrow$ banner alarmowy w UI).}
+\caption{Dwa równoległe potoki przetwarzania DDDS współdzielące moduły ekstrakcji
+cech (MFCC 120-D) oraz klasyfikator (Random Forest 300 drzew). Potok
+\emph{TRAIN} działa wsadowo (offline) i kończy się raportem ewaluacyjnym;
+potok \emph{LIVE} działa w czasie rzeczywistym i emituje zdarzenia detekcji
+do dashboardu Streamlit.}
 \label{rys:dataflow}
 \end{figure}
 
@@ -459,7 +498,7 @@ przedstawia \tabref{tab:hardware}.
 
 \begin{table}[H]
 \centering
-\caption{Zestawienie komponentów sprzętowych prototypu AeroEar.}
+\caption{Zestawienie komponentów sprzętowych prototypu DDDS.}
 \label{tab:hardware}
 \begin{tabularx}{\linewidth}{clXl}
 \toprule
@@ -489,7 +528,7 @@ Stos technologiczny zbudowano w pełni z otwartego oprogramowania (FOSS).
 
 \begin{table}[H]
 \centering
-\caption{Stos technologiczny systemu AeroEar.}
+\caption{Stos technologiczny systemu DDDS.}
 \label{tab:software}
 \begin{tabularx}{\linewidth}{llX}
 \toprule
@@ -858,6 +897,63 @@ def stream_detections(model, device=None, sample_rate=None,
                 buffer = buffer[last_emit:]; last_emit = 0
 \end{lstlisting}
 
+Model wątkowy pętli real-time'owej przedstawia \rysref{rys:threading}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >={Stealth[length=2mm]},
+  every node/.style={font=\scriptsize},
+  prod/.style={rectangle, rounded corners=3pt, draw=cool, fill=cool!12,
+               minimum width=3.0cm, minimum height=2.1cm, align=center,
+               inner sep=4pt},
+  q/.style   ={rectangle, rounded corners=3pt, draw=accent2, fill=accent2!12,
+               minimum width=2.4cm, minimum height=2.1cm, align=center,
+               inner sep=4pt},
+  cons/.style={rectangle, rounded corners=3pt, draw=accent, fill=accent!10,
+               minimum width=3.8cm, minimum height=2.1cm, align=center,
+               inner sep=4pt},
+  ev/.style  ={rectangle, rounded corners=3pt, draw=danger, fill=danger!12,
+               minimum width=3.4cm, minimum height=0.9cm, align=center,
+               inner sep=2pt, font=\scriptsize\bfseries},
+  ar/.style={-{Stealth[length=1.8mm]}, line width=0.55pt, draw=black!55},
+]
+\node[prod] (p) {%
+  \textbf{Producent}\\[2pt]
+  \scriptsize callback PortAudio\\
+  \scriptsize (\texttt{sounddevice})\\[2pt]
+  \scriptsize natywne $f_s = 48000$ Hz\\
+  \scriptsize blocksize = $hop/4$};
+\node[q, right=0.55 of p] (q) {%
+  \textbf{queue.Queue}\\[2pt]
+  \scriptsize bufor blokowy\\
+  \scriptsize thread-safe\\[2pt]
+  \scriptsize \texttt{put} / \texttt{get}};
+\node[cons, right=0.55 of q] (c) {%
+  \textbf{Konsument}\\[2pt]
+  \scriptsize akumulacja w ring buffer\\
+  \scriptsize resample $f_s\!\to\!22050$\\
+  \scriptsize MFCC 120-D\\
+  \scriptsize \texttt{model.predict\_proba}\\
+  \scriptsize \texttt{yield DetectionEvent}};
+\node[ev, below=0.55 of c] (e) {\texttt{DetectionEvent}\ \ $\longrightarrow$\ \ dashboard Streamlit};
+
+\draw[ar] (p) -- (q);
+\draw[ar] (q) -- (c);
+\draw[ar] (c) -- (e);
+\end{tikzpicture}
+\caption{Model producent--konsument zaimplementowany w
+\texttt{live/mic.py}. Wątek-producent (callback PortAudio) wpycha do
+kolejki bufory wejściowe na natywnej częstotliwości próbkowania urządzenia
+(typowo 48\,000\,Hz dla mikrofonów USB na Windows). Wątek-konsument drenuje
+kolejkę, utrzymuje bufor pierścieniowy, resampluje każde okno do
+częstotliwości treningowej modelu (22\,050\,Hz), oblicza 120-wymiarowy
+wektor MFCC i emituje obiekt \texttt{DetectionEvent} co
+\texttt{live\_hop\_seconds} (0{,}5\,s w konfiguracji domyślnej). Zdarzenie
+trafia do dashboardu Streamlit, gdzie aktualizuje banner detekcji.}
+\label{rys:threading}
+\end{figure}
+
 \subsection{Dashboard Streamlit z animowanym bannerem detekcji}
 
 Front-end stanowi pięciostronicowy dashboard Streamlit. Najciekawsza
@@ -937,6 +1033,46 @@ pojedynczym oknie 2-sekundowym przebiega następująco:
   \item \textbf{Klasyfikator Random Forest} (300 drzew, ważenie klas
         zbalansowane) zwraca wektor prawdopodobieństw klas.
 \end{enumerate}
+
+Schemat blokowy całego pipeline'u ekstrakcji cech prezentuje
+\rysref{rys:mfcc}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >={Stealth[length=2mm]},
+  every node/.style={font=\scriptsize},
+  s/.style={rectangle, rounded corners=2pt, draw=cool,   fill=cool!12,
+            minimum width=1.55cm, minimum height=0.85cm, align=center, inner sep=2pt},
+  t/.style={rectangle, rounded corners=2pt, draw=accent, fill=accent!8,
+            minimum width=1.55cm, minimum height=0.85cm, align=center, inner sep=2pt},
+  o/.style={rectangle, rounded corners=2pt, draw=accent2,fill=accent2!18,
+            minimum width=1.85cm, minimum height=0.85cm, align=center, inner sep=2pt,
+            font=\scriptsize\bfseries},
+  ar/.style={-{Stealth[length=1.7mm]}, line width=0.45pt, draw=black!55},
+]
+\node[s]                       (in)   {Audio 2 s\\22050 Hz};
+\node[t,  right=0.25 of in]    (pe)   {Pre-emph\\$0{,}97$};
+\node[t,  right=0.25 of pe]    (stft) {STFT\\$N\!=\!2048$};
+\node[t,  right=0.25 of stft]  (mel)  {Mel\\128 bin};
+\node[t,  right=0.25 of mel]   (log)  {log power};
+\node[t,  right=0.25 of log]   (dct)  {DCT 40\\$40\!\times\!87$};
+\node[t,  right=0.25 of dct]   (agg)  {agg.\\$\mu, \sigma, \overline{\Delta\mu}$};
+\node[o,  right=0.25 of agg]   (vec)  {wektor\\120-D};
+
+\foreach \a/\b in {in/pe, pe/stft, stft/mel, mel/log, log/dct, dct/agg, agg/vec} {
+  \draw[ar] (\a) -- (\b);
+}
+\end{tikzpicture}
+\caption{Pipeline ekstrakcji 120-wymiarowego wektora cech MFCC. Z
+2-sekundowego okna audio o częstotliwości próbkowania 22\,050\,Hz powstaje
+macierz $40 \times 87$ współczynników cepstralnych. Agregacja po osi
+czasowej daje trzy bloki po 40 wartości: średnią $\mu$, odchylenie
+standardowe $\sigma$ oraz średnią pierwszej pochodnej temporalnej
+$\overline{\Delta\mu}$. Konkatenacja produkuje końcowy 120-D wektor cech
+podawany na wejście klasyfikatora.}
+\label{rys:mfcc}
+\end{figure}
 
 \textbf{Dlaczego MFCC?} Współczynniki MFCC (\emph{Mel-Frequency Cepstral
 Coefficients}, Davis i Mermelstein 1980 \cite{mfcc}) są od kilku dekad
@@ -1035,6 +1171,39 @@ c(T, RH) \approx 331{,}3 + 0{,}606 \cdot T + 0{,}0124 \cdot RH \quad [\text{m/s}
 gdzie $T$ to temperatura w $^\circ\text{C}$, a $RH$ wilgotność względna w \%.
 Przy $T = 20$, $RH = 50$ otrzymujemy $c \approx 344$\,m/s.
 
+\textbf{Surowe sygnały z 4 mikrofonów.} Aby algorytm miał z czego liczyć
+opóźnienia, musi zarejestrować ten sam impuls akustyczny na wszystkich
+czterech kanałach. \rysref{rys:4mic} pokazuje syntetyczny przykład dla
+kwadratowego szyku o bazie 30\,cm i źródła o azymucie 30°. Ten sam ostry
+impuls trafia do mikrofonu M3 najwcześniej (jest najbliżej źródła), do M1
+najpóźniej (jest najdalej). Różnice są \emph{mikrosekundowe}
+(setki~$\mu$s, kilkadziesiąt próbek przy 48\,kHz) --- to właśnie ta
+sub-milisekundowa rozdzielczość czasowa wymaga sample-synchronicznego
+przechwytywania na poziomie sprzętowym (sekcja końcowa rozdziału).
+
+\begin{figure}[H]
+\centering
+\figureifexists{images/chart_4mic_waveforms.png}{0.95\linewidth}
+\caption{Ten sam impuls akustyczny zarejestrowany jednocześnie przez 4
+mikrofony szyku kwadratowego o bazie 30\,cm. Niebieskie linie przerywane
+oznaczają chwilę przyjścia szczytu impulsu; różnice względem mikrofonu
+referencyjnego M1 wynoszą od $-400$ do $-1200$\,$\mu$s, co odpowiada
+21--57~próbkom przy $f_s = 48$\,kHz. Z tych mikroróżnic algorytm GCC-PHAT
+wyznacza wektor TDOA $(\tau_{12}, \tau_{13}, \tau_{14})$, który następnie
+linearyzuje się do układu na kierunek przyjścia fali $\hat{\mathbf{u}}$
+(opisane poniżej).}
+\label{rys:4mic}
+\end{figure}
+
+\textbf{Jak z tych przesunięć dostajemy kierunek?} W trzech krokach:
+(1)~każdą parę mikrofonów $(i,j)$ przepuszczamy przez GCC-PHAT i
+otrzymujemy estymatę $\hat\tau_{ij}$ --- pojedynczą liczbę w ms;
+(2)~dla 4 mikrofonów mamy 6 par, czyli 6 równań na 2 niewiadome (kąt
+azymutu i elewacji) --- układ \emph{nadokreślony}, rozwiązywany metodą
+najmniejszych kwadratów; (3)~wynikowy wektor jednostkowy
+$\hat{\mathbf{u}}$ jednoznacznie wyznacza kierunek przyjścia fali w
+płaszczyźnie poziomej.
+
 \textbf{Szacowanie TDOA metodą GCC-PHAT.} Dla każdej z 6 par mikrofonów liczymy
 uogólnioną korelację wzajemną z transformacją fazową:
 \begin{equation}
@@ -1046,7 +1215,21 @@ R_{ij}(\tau) = \mathcal{F}^{-1}\!\!\left\{
 \end{equation}
 Biełowanie PHAT usuwa amplitudową informację, pozostawiając jedynie fazę. Jest
 to konfiguracja \textbf{odporna na pogłos i nieznane widmo źródła} --- oba
-te warunki są w warunkach polowych nietrywialne.
+te warunki są w warunkach polowych nietrywialne. Wynik takiej korelacji ma
+postać wąskiego, ostrego piku w okolicy faktycznego opóźnienia ---
+\rysref{rys:gcc} prezentuje typowy kształt $R_{ij}(\tau)$ dla pary
+mikrofonów z poprzedniej ilustracji.
+
+\begin{figure}[H]
+\centering
+\figureifexists{images/chart_gcc_phat.png}{0.92\linewidth}
+\caption{Przykładowa funkcja $R_{ij}(\tau)$ uzyskana metodą GCC-PHAT dla
+jednej z 6 par mikrofonów. Pik główny w $\hat\tau = +0{,}45$\,ms odpowiada
+faktycznemu opóźnieniu sygnału między mikrofonem $i$ a $j$. Mniejsze
+,,duchy'' po bokach to artefakty pogłosu i szumu --- wybielenie fazą (PHAT)
+skutecznie je tłumi w stosunku do klasycznej korelacji.}
+\label{rys:gcc}
+\end{figure}
 
 \textbf{Estymacja kierunku.} W przybliżeniu fali płaskiej:
 \begin{equation}
@@ -1082,7 +1265,22 @@ próbkowania.}
 Dashboard projektu (\sectionref{sec:ui}) udostępnia tę zależność jako
 \emph{interaktywny suwak}: użytkownik może w czasie rzeczywistym obserwować,
 jak zmiana bazy, $f_s$, $T$, $RH$ oraz kierunku źródła wpływa na geometrię
-i TDOA wszystkich 6 par.
+i TDOA wszystkich 6 par. Wygląd strony \emph{4-mic TDOA concept} z bieżącymi
+ustawieniami przedstawia \rysref{rys:tdoa_ui}.
+
+\begin{figure}[H]
+\centering
+\figureifexists{images/screen_tdoa_concept.png}{\linewidth}
+\caption{Strona \emph{4-mic TDOA concept} dashboardu DDDS.
+Cztery karty KPI na górze (prędkość dźwięku, rozdzielczość kątowa
+$\Delta\varphi = 0{,}89^\circ$, maksymalne TDOA, długość fali dla wybranej
+częstotliwości), interaktywna wizualizacja geometrii szyku kwadratowego z
+bieżącym kierunkiem źródła oraz frontem fali padającej, tabela TDOA dla
+wszystkich sześciu par mikrofonów (w milisekundach oraz w próbkach przy
+$f_s = 22\,050$\,Hz i $f_s = 48\,000$\,Hz). Wszystkie wykresy aktualizują
+się w czasie rzeczywistym wraz z ruchem siedmiu suwaków w panelu bocznym.}
+\label{rys:tdoa_ui}
+\end{figure}
 
 \textbf{Krytyczne wymaganie sprzętowe.} Algorytm wymaga \emph{próbkowo-synchronicznego}
 przechwytywania ze wszystkich 4 kanałów. Cztery niezależne mikrofony USB
@@ -1108,7 +1306,7 @@ przedstawia \tabref{tab:latency}.
 
 \begin{table}[H]
 \centering
-\caption{Dekompozycja latencji systemu AeroEar (mikrofon Maono, RPi4 lub
+\caption{Dekompozycja latencji systemu DDDS (mikrofon Maono, RPi4 lub
 laptop, sieć lokalna).}
 \label{tab:latency}
 \begin{tabular}{lr}
@@ -1185,6 +1383,25 @@ i Streamlit nie uruchamia serwera HTTP; aby uniknąć tej pułapki, wprowadzono
 \emph{auto-relaunch}: skrypt sam re-exec'uje się przez \texttt{streamlit.web.cli}.
 Pozwala to uruchamiać dashboard dowolnym sposobem, jaki użytkownik preferuje.
 
+Najważniejszą wizualnie stroną dashbordu jest strona \emph{Live microphone},
+której wygląd w stanie \emph{CLEAR} przedstawia \rysref{rys:live_ui}.
+
+\begin{figure}[H]
+\centering
+\figureifexists{images/screen_live_mic.png}{\linewidth}
+\caption{Strona \emph{Live microphone} dashboardu DDDS w trybie pracy
+(stan CLEAR, $P(\text{shahed}) = 0{,}44$, próg detekcji $T = 0{,}50$,
+mikrofon \emph{Microphone Array 2 (Realtek HD Audio)}, $f_s = 16\,000$\,Hz,
+4 kanały). Centralnie zielony banner alarmowy z animacją CSS
+\texttt{pulse\_clear}; poniżej w trzech kolumnach: gauge Plotly z aktualną
+wartością $P(\text{shahed})$ (44\,\%) i strzałką delty względem progu,
+poziome paski prawdopodobieństw per-klasy oraz miernik VU pokazujący
+poziom wejściowy w dBFS ($-59{,}5$\,dB). U dołu karta KPI \emph{inference rate}
+z bieżącym taktowaniem inferencji (2\,fps przy oknie 2000\,ms). W stanie
+detekcji banner zmienia się na czerwony z animacją \texttt{pulse\_detect}.}
+\label{rys:live_ui}
+\end{figure}
+
 % ========================== 14. TESTOWANIE ===================================
 \section{Testowanie systemu}
 \label{sec:testowanie}
@@ -1236,7 +1453,7 @@ T9 & Auto-relaunch z \texttt{python streamlit\_app.py}                    & 3  &
 
 \begin{table}[H]
 \centering
-\caption{Metryki wydajnościowe systemu AeroEar.}
+\caption{Metryki wydajnościowe systemu DDDS.}
 \label{tab:perf}
 \begin{tabular}{lrrr}
 \toprule
@@ -1258,6 +1475,21 @@ tej samej dystrybucji co treningowy (YouTube), nie z pomiarów polowych z
 fizycznym dronem --- pełne, uczciwe testy SNR-vs-odległość pozostają jako
 naturalna ścieżka rozwoju.
 
+Macierz pomyłek dla powyższych wyników przedstawia \rysref{rys:cm}.
+
+\begin{figure}[H]
+\centering
+\figureifexists{images/chart_confusion_matrix.png}{0.55\linewidth}
+\caption{Macierz pomyłek klasyfikatora Random Forest na zbiorze testowym
+($n = 147$ chunków, stratyfikowany podział 80/20). Wartości na diagonali
+to poprawne klasyfikacje, poza diagonalą --- pomyłki. Z 76 prawdziwych
+próbek klasy \emph{noise} 71 zostało poprawnie odrzuconych (5 fałszywych
+alarmów), a z 71 próbek \emph{shahed} 64 zostało rozpoznanych (7 nieuda\-nych
+detekcji). Recall dla klasy pozytywnej wynosi $\approx 90$\,\%, a precision
+$\approx 93$\,\%.}
+\label{rys:cm}
+\end{figure}
+
 \subsection{Testy odporności}
 
 \begin{itemize}[noitemsep]
@@ -1275,59 +1507,7 @@ naturalna ścieżka rozwoju.
         których folderów wrzucić MP3.
 \end{itemize}
 
-% =========================== 15. ANALIZA KOSZTÓW =============================
-\section{Analiza kosztów}
-
-Koszt prototypu jest minimalny i ogranicza się w obecnej fazie do mikrofonu USB
-oraz licencji oprogramowania (zerowej --- cały stos jest FOSS).
-
-\begin{table}[H]
-\centering
-\caption{Bill of Materials AeroEar (faza obecna).}
-\label{tab:bom}
-\begin{tabular}{lrr}
-\toprule
-\textbf{Komponent}                              & \textbf{Szt.} & \textbf{Łącznie}  \\
-\midrule
-Mikrofon USB Maono PM421/PM422                 & 1           & $\sim 80$\,PLN     \\
-Oprogramowanie (cały stos FOSS)                & --          & 0\,PLN             \\
-Laptop x86\_64 (sprzęt istniejący)             & --          & 0\,PLN (sunk cost) \\
-\midrule
-\textbf{Razem}                                 &             & \textbf{$\sim 80$\,PLN} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Dla pełnej realizacji koncepcji 4-mikrofonowej:
-
-\begin{table}[H]
-\centering
-\caption{BOM dla docelowej fazy z szykiem 4-mikrofonowym (wariant DIY).}
-\label{tab:bom2}
-\begin{tabular}{lrr}
-\toprule
-\textbf{Komponent}                              & \textbf{Szt.} & \textbf{Łącznie}  \\
-\midrule
-ESP32-S3 DevKit-N16R8                          & 1           & $\sim 65$\,PLN     \\
-INMP441 (I$^2$S MEMS)                          & 4           & $\sim 50$\,PLN     \\
-BME280 (T, RH, p)                              & 1           & $\sim 20$\,PLN     \\
-PCB / perfboard + przewody                     & --          & $\sim 30$\,PLN     \\
-Raspberry Pi 5 (4\,GB)                         & 1           & $\sim 340$\,PLN    \\
-Karta microSD 64\,GB                           & 1           & $\sim 40$\,PLN     \\
-Zasilacz Pi5 USB-C 5\,V/5\,A                   & 1           & $\sim 60$\,PLN     \\
-\midrule
-\textbf{Razem (faza docelowa)}                 &             & \textbf{$\sim 605$\,PLN} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Porównanie:} komercyjne systemy akustycznej detekcji dronów (np.\ DroneShield
-RfPatrol z modułem audio) startują od kilkuset tysięcy USD. Otwarty projekt
-AeroEar oferuje porównywalną podstawową funkcjonalność za \textbf{trzy rzędy
-wielkości mniej} (przy oczywistym kompromisie co do zasięgu, dokładności i
-wsparcia).
-
-% ==================== 16. BEZPIECZEŃSTWO I PRYWATNOŚĆ ========================
+% ==================== 15. BEZPIECZEŃSTWO I PRYWATNOŚĆ ========================
 \section{Bezpieczeństwo, prywatność i etyka}
 \label{sec:bezpieczenstwo}
 
@@ -1410,44 +1590,7 @@ Naturalne kierunki rozszerzenia projektu, w kolejności rosnącej trudności:
         cywilnej.
 \end{enumerate}
 
-% ======================== 18. DEMONSTRACJA ===================================
-\section{Demonstracja działania systemu}
-
-Demonstracja na żywo na obronie projektu przebiega według następującego
-scenariusza (typowy czas $\sim 8$\,minut):
-
-\begin{enumerate}[noitemsep]
-  \item \textbf{Otwarcie dashboardu (0:00--0:30)} --- \texttt{drone-detector
-        ui} uruchamia serwer Streamlit, otwiera przeglądarka. Pokazana zostaje
-        strona \emph{Overview} z kartami KPI, schematem pipeline'u i wynikami
-        ostatniej ewaluacji.
-  \item \textbf{Strona \emph{Train pipeline} (0:30--1:30)} --- omówienie
-        pięcioetapowego diagramu; jeśli potrzeba pokazany jest jeden cykl
-        retreningu na nowym zbiorze. Po zakończeniu wyświetlone są: animacja
-        \emph{balloons}, macierz pomyłek, classification report.
-  \item \textbf{Strona \emph{Analyse a file} (1:30--3:00)} --- wgranie
-        wybranego pliku MP3 z atakiem Shahed; wyświetlenie gauge'a peak
-        $P$, osi probability timeline (z silnymi pikami w momentach, gdy
-        dron jest słyszalny), spektrogramu mel.
-  \item \textbf{Strona \emph{Live microphone} (3:00--5:30)} --- wybór
-        mikrofonu, kliknięcie \emph{Start}. Po 2 sekundach pojawia się
-        banner \emph{CLEAR} (zielony pulse). Następnie odtworzenie klipu
-        Shahed z YouTube na telefonie trzymanym 30\,cm od mikrofonu ---
-        banner zmienia się na \emph{SHAHED DETECTED} (czerwony pulse),
-        gauge skacze, paski klas się animują, rolujący spektrogram
-        pokazuje tonalny pas $\sim 100$\,Hz.
-  \item \textbf{Strona \emph{4-mic TDOA concept} (5:30--7:00)} ---
-        przesuwanie suwaków bazy, $f_s$, $T$, kąta źródła; obserwowanie,
-        jak na żywo zmieniają się: geometria szyku, tabela TDOA dla 6 par,
-        krzywa rozdzielczości, krzywa $c(T)$.
-  \item \textbf{Powrót na \emph{Overview} (7:00--8:00)} --- podsumowanie,
-        wskazanie ścieżki rozwoju (\sectionref{sec:rozwoj}).
-\end{enumerate}
-
-\noindent\textbf{Plan B} (jeśli mikrofon zawiedzie): odtworzenie krótkiego
-nagrania ekranu (\texttt{docs/images/demo.mp4}) zarejestrowanego wcześniej.
-
-% ========================= 19. WNIOSKI =======================================
+% ========================= 17. WNIOSKI =======================================
 \section{Wnioski końcowe}
 
 Wszystkie założone cele projektu zostały zrealizowane: zaprojektowano
@@ -1487,7 +1630,7 @@ Commits}.
         w zastosowaniach obrony cywilnej.
 \end{enumerate}
 
-Projekt AeroEar stanowi praktyczny wkład w obszar \emph{accessible defense
+Projekt DDDS stanowi praktyczny wkład w obszar \emph{accessible defense
 informatics} i może służyć jako podstawa do dalszej rozbudowy w kierunku
 fizycznego szyku 4-mikrofonowego, sieci edge node'ów w stylu Sky Fortress,
 oraz integracji z systemami obrony cywilnej.
@@ -1610,7 +1753,7 @@ J. Acoust. Soc. Am., vol.\ 93, no.\ 5, pp.\ 2510--2516, 1993.
 
 \bibitem{repo}
 O.~Kropyva,
-\textit{drone-detector --- AeroEar acoustic UAV detection system},
+\textit{drone-detector --- DDDS acoustic UAV detection system},
 GitHub, 2026.
 \url{https://github.com/dtecx/drone-detector}.
 
